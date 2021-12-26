@@ -92,10 +92,10 @@ func TestGetShortURL(t *testing.T) {
 				assert.Equal(t, tt.want1.contentType, result.Header.Get("Content-Type"))
 				body, err := ioutil.ReadAll(result.Body)
 				require.NoError(t, err)
-				err = result.Body.Close()
-				if err != nil {
-					assert.Error(t, err, "Error on read body after create short link")
-				}
+				defer result.Body.Close()
+				//if err != nil {
+				//	assert.Error(t, err, "Error on read body after create short link")
+				//}
 				link := string(body)
 				assert.Regexp(t, tt.want1.regexpLink, link, "Short URL doesn't match the pattern")
 
@@ -104,10 +104,10 @@ func TestGetShortURL(t *testing.T) {
 
 				assert.Equal(t, http.StatusMovedPermanently, resultShort.StatusCode)
 				assert.Equal(t, tt.request.originalURL, resultShort.Header.Get("Location"), "Sent and got link is different")
-				err = resultShort.Body.Close()
-				if err != nil {
-					assert.Error(t, err, "Error on read body after get short link")
-				}
+				defer resultShort.Body.Close()
+				//if err != nil {
+				//	assert.Error(t, err, "Error on read body after get short link")
+				//}
 			}
 
 		})
@@ -140,10 +140,10 @@ func TestShortURL(t *testing.T) {
 
 			assert.Equal(t, tt.want1.statusCode, result.StatusCode)
 
-			err := result.Body.Close()
-			if err != nil {
-				assert.Error(t, err, "Error on read body after get short link")
-			}
+			defer result.Body.Close()
+			//if err != nil {
+			//	assert.Error(t, err, "Error on read body after get short link")
+			//}
 
 		})
 	}
