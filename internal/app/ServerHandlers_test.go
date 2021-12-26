@@ -32,7 +32,7 @@ type tstRequest struct {
 	want1    want
 }
 
-func TestGetShortUrl(t *testing.T) {
+func TestGetShortURL(t *testing.T) {
 
 	tests := []tstRequest{
 		{
@@ -85,7 +85,7 @@ func TestGetShortUrl(t *testing.T) {
 		t.Run(tt.nameTest, func(t *testing.T) {
 
 			request := httptest.NewRequest(tt.request.method, tt.request.url, strings.NewReader(tt.request.originalURL))
-			result := SendRequest(request, app.GetShortUrl)
+			result := SendRequest(request, app.GetShortURL)
 
 			assert.Equal(t, tt.want1.statusCode, result.StatusCode)
 			if result.StatusCode == http.StatusCreated {
@@ -96,8 +96,8 @@ func TestGetShortUrl(t *testing.T) {
 				link := string(body)
 				assert.Regexp(t, tt.want1.regexpLink, link, "Short URL doesn't match the pattern")
 
-				requestShortUrl := httptest.NewRequest(http.MethodGet, link, strings.NewReader(tt.request.originalURL))
-				resultShort := SendRequest(requestShortUrl, app.GetFullURLByFullUrl)
+				requestShortURL := httptest.NewRequest(http.MethodGet, link, strings.NewReader(tt.request.originalURL))
+				resultShort := SendRequest(requestShortURL, app.GetFullURLByFullURL)
 				assert.Equal(t, http.StatusMovedPermanently, resultShort.StatusCode)
 				assert.Equal(t, tt.request.originalURL, resultShort.Header.Get("Location"), "Sent and got link is different")
 			}
@@ -106,7 +106,7 @@ func TestGetShortUrl(t *testing.T) {
 	}
 }
 
-func TestShortUrl(t *testing.T) {
+func TestShortURL(t *testing.T) {
 
 	tests := []tstRequest{
 		{
@@ -128,7 +128,7 @@ func TestShortUrl(t *testing.T) {
 		t.Run(tt.nameTest, func(t *testing.T) {
 
 			request := httptest.NewRequest(tt.request.method, tt.request.url, strings.NewReader(tt.request.originalURL))
-			result := SendRequest(request, app.GetFullURLByFullUrl)
+			result := SendRequest(request, app.GetFullURLByFullURL)
 
 			assert.Equal(t, tt.want1.statusCode, result.StatusCode)
 

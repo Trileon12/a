@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGetOriginalUrl(t *testing.T) {
+func TestGetOriginalURL(t *testing.T) {
 	type args struct {
 		shortURL string
 	}
@@ -30,9 +30,9 @@ func TestGetOriginalUrl(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			shortURL := storage.GetUrlShort(tt.args.shortURL)
+			shortURL := storage.GetURLShort(tt.args.shortURL)
 
-			got, err := storage.GetOriginalUrl(shortURL)
+			got, err := storage.GetOriginalURL(shortURL)
 
 			require.NoError(t, err)
 			require.Equal(t, tt.args.shortURL, got)
@@ -41,7 +41,7 @@ func TestGetOriginalUrl(t *testing.T) {
 	}
 }
 
-func TestGetOriginalUrlErr(t *testing.T) {
+func TestGetOriginalURLErr(t *testing.T) {
 	type args struct {
 		shortURL string
 	}
@@ -61,7 +61,7 @@ func TestGetOriginalUrlErr(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			_, err := storage.GetOriginalUrl(tt.args.shortURL)
+			_, err := storage.GetOriginalURL(tt.args.shortURL)
 
 			require.Error(t, err)
 
@@ -69,7 +69,7 @@ func TestGetOriginalUrlErr(t *testing.T) {
 	}
 }
 
-func TestGetUrlShort(t *testing.T) {
+func TestGetURLShort(t *testing.T) {
 	type args struct {
 		originalURL string
 	}
@@ -91,7 +91,7 @@ func TestGetUrlShort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := storage.GetUrlShort(tt.args.originalURL)
+			got := storage.GetURLShort(tt.args.originalURL)
 			assert.Regexp(t, tt.want, got, "Random Str doesn't match the pattern")
 		})
 	}

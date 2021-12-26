@@ -12,38 +12,38 @@ func init() {
 
 }
 
-const shortUrlLen = 6
+const shortURLLen = 6
 
-//Create and return short url for given original URL. Return the same short url for the same orginal Url
-func GetUrlShort(originalURL string) string {
+//Create and return short url for given original URL. Return the same short url for the same orginal URL
+func GetURLShort(originalURL string) string {
 
-	if shortUrl, isExists := URLsRevers[originalURL]; isExists {
-		return shortUrl
+	if shortURL, isExists := URLsRevers[originalURL]; isExists {
+		return shortURL
 	}
 
-	shortUrl := getUnicUrl()
-	URLs[shortUrl] = originalURL
+	shortURL := getUnicURL()
+	URLs[shortURL] = originalURL
 
-	return shortUrl
+	return shortURL
 }
 
 //Func returns original url by short url
-func GetOriginalUrl(shortURL string) (string, error) {
+func GetOriginalURL(shortURL string) (string, error) {
 
-	if originalUrl, isExists := URLs[shortURL]; isExists {
-		return originalUrl, nil
+	if originalURL, isExists := URLs[shortURL]; isExists {
+		return originalURL, nil
 	} else {
 		return "", errors.New("URL не найден")
 	}
 }
 
-func getUnicUrl() string {
+func getUnicURL() string {
 
 	found := false
-	shortUrl := RandString(shortUrlLen)
+	shortURL := RandString(shortURLLen)
 
-	for _, found = URLs[shortUrl]; found; {
-		shortUrl = RandString(shortUrlLen)
+	for _, found = URLs[shortURL]; found; {
+		shortURL = RandString(shortURLLen)
 	}
-	return shortUrl
+	return shortURL
 }

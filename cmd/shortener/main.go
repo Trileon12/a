@@ -9,8 +9,8 @@ import (
 func main() {
 	r := chi.NewRouter()
 
-	r.Post("/", app.GetShortUrl)
-	r.Get("/{ID}", app.GetFullURLByFullUrl)
+	r.Post("/", app.GetShortURL)
+	r.Get("/{ID}", app.GetFullURLByFullURL)
 
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {

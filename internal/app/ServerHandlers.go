@@ -13,7 +13,7 @@ func init() {
 	HostShortURLs = "http://localhost:8080/"
 }
 
-func GetShortUrl(writer http.ResponseWriter, request *http.Request) {
+func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 
 	b, err := io.ReadAll(request.Body)
 	if err != nil {
@@ -27,17 +27,17 @@ func GetShortUrl(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, "Body is empty", http.StatusInternalServerError)
 		return
 	}
-	shortLink := HostShortURLs + storage.GetUrlShort(link)
+	shortLink := HostShortURLs + storage.GetURLShort(link)
 	writer.Header().Set("Content-Type", "text/plain")
 	writer.WriteHeader(http.StatusCreated)
 	writer.Write([]byte(shortLink))
 }
 
-func GetFullURLByFullUrl(writer http.ResponseWriter, request *http.Request) {
+func GetFullURLByFullURL(writer http.ResponseWriter, request *http.Request) {
 
 	id := path.Base(request.URL.Path)
 
-	URL, err := storage.GetOriginalUrl(id)
+	URL, err := storage.GetOriginalURL(id)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusNotFound)
 		return
