@@ -102,7 +102,7 @@ func TestGetShortURL(t *testing.T) {
 				requestShortURL := httptest.NewRequest(http.MethodGet, link, strings.NewReader(tt.request.originalURL))
 				resultShort := SendRequest(requestShortURL, app.GetFullURLByFullURL)
 
-				assert.Equal(t, http.StatusMovedPermanently, resultShort.StatusCode)
+				assert.Equal(t, http.StatusTemporaryRedirect, resultShort.StatusCode)
 				assert.Equal(t, tt.request.originalURL, resultShort.Header.Get("Location"), "Sent and got link is different")
 				defer resultShort.Body.Close()
 				//if err != nil {

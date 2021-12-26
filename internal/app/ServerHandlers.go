@@ -46,6 +46,6 @@ func GetFullURLByFullURL(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	writer.Header().Set("Location", URL)
-	writer.WriteHeader(http.StatusMovedPermanently)
+	writer.WriteHeader(http.StatusTemporaryRedirect)
 
 }
