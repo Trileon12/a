@@ -37,7 +37,7 @@ func TestGetShortURL(t *testing.T) {
 	tests := []tstRequest{
 		{
 
-			nameTest: "Get standard URL",
+			nameTest: "Get standard URL _",
 			request: request{
 				method:      http.MethodPost,
 				url:         "/",
