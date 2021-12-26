@@ -30,7 +30,10 @@ func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 	shortLink := HostShortURLs + storage.GetURLShort(link)
 	writer.Header().Set("Content-Type", "text/plain")
 	writer.WriteHeader(http.StatusCreated)
-	writer.Write([]byte(shortLink))
+	_, err = writer.Write([]byte(shortLink))
+	if err != nil {
+		return
+	}
 }
 
 func GetFullURLByFullURL(writer http.ResponseWriter, request *http.Request) {
