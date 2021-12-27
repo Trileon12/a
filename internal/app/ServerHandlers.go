@@ -1,7 +1,6 @@
 package app
 
 import (
-	"encoding/json"
 	"github.com/Trileon12/a/internal/storage"
 	"io"
 	"net/http"
@@ -14,7 +13,9 @@ func init() {
 	HostShortURLs = "http://localhost:8080/"
 }
 
-type ShortLink string
+type shortLink struct {
+	shortLink string
+}
 
 func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 
@@ -31,14 +32,10 @@ func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	shortLink := HostShortURLs + storage.GetURLShort(link)
-	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	writer.WriteHeader(http.StatusCreated)
-	resp, err := json.Marshal(shortLink)
-	if err != nil {
-		http.Error(writer, err.Error(), 500)
-		return
-	}
-	_, err = writer.Write(resp)
+
+	_, err = writer.Write([]byte(shortLink))
 	if err != nil {
 		return
 	}
