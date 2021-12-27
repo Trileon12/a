@@ -32,7 +32,7 @@ func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	shortLink := HostShortURLs + storage.GetURLShort(link)
-	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	writer.WriteHeader(http.StatusCreated)
 
 	_, err = writer.Write([]byte(shortLink))
