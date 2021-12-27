@@ -1,6 +1,7 @@
 package app_test
 
 import (
+	"encoding/json"
 	"github.com/Trileon12/a/internal/app"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
@@ -44,7 +45,7 @@ func TestGetShortURL(t *testing.T) {
 				originalURL: "www.google.com",
 			},
 			want1: want{
-				contentType: "text/plain",
+				contentType: "application/json",
 				statusCode:  http.StatusCreated,
 				regexpLink:  "^" + host + "[[:alpha:]]{6}$",
 			},
@@ -58,7 +59,7 @@ func TestGetShortURL(t *testing.T) {
 				originalURL: "https://www.google.com/maps/place/%D0%A2%D0%B0%D0%B4%D0%B5%D0%B1%D1%8F-%D0%AF%D1%85%D0%B0,+%D0%AF%D0%BC%D0%B0%D0%BB%D0%BE-%D0%9D%D0%B5%D0%BD%D0%B5%D1%86%D0%BA%D0%B8%D0%B9+%D0%B0%D0%B2%D1%82%D0%BE%D0%BD%D0%BE%D0%BC%D0%BD%D1%8B%D0%B9+%D0%BE%D0%BA%D1%80%D1%83%D0%B3,+629705/@70.3779226,74.1234431,15z/data=!3m1!4b1!4m5!3m4!1s0x4497ae2225174a49:0xbf4bb88041f8a6f3!8m2!3d70.3779692!4d74.132309",
 			},
 			want1: want{
-				contentType: "text/plain",
+				contentType: "application/json",
 				statusCode:  http.StatusCreated,
 				regexpLink:  "^" + host + "[[:alpha:]]{6}$",
 			}},
@@ -96,10 +97,13 @@ func TestGetShortURL(t *testing.T) {
 				//if err != nil {
 				//	assert.Error(t, err, "Error on read body after create short link")
 				//}
-				link := string(body)
-				assert.Regexp(t, tt.want1.regexpLink, link, "Short URL doesn't match the pattern")
+				sl := app.ShortLink{}
+				err = json.Unmarshal(body, &sl)
+				require.NoError(t, err)
 
-				requestShortURL := httptest.NewRequest(http.MethodGet, link, strings.NewReader(tt.request.originalURL))
+				assert.Regexp(t, tt.want1.regexpLink, sl.ShortLink, "Short URL doesn't match the pattern")
+
+				requestShortURL := httptest.NewRequest(http.MethodGet, sl.ShortLink, strings.NewReader(tt.request.originalURL))
 				resultShort := SendRequest(requestShortURL, app.GetFullURLByFullURL)
 
 				assert.Equal(t, http.StatusTemporaryRedirect, resultShort.StatusCode)
