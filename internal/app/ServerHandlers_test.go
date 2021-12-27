@@ -1,7 +1,6 @@
 package app_test
 
 import (
-	"encoding/json"
 	"github.com/Trileon12/a/internal/app"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
@@ -97,13 +96,15 @@ func TestGetShortURL(t *testing.T) {
 				//if err != nil {
 				//	assert.Error(t, err, "Error on read body after create short link")
 				//}
-				sl := app.ShortLink{}
-				err = json.Unmarshal(body, &sl)
-				require.NoError(t, err)
 
-				assert.Regexp(t, tt.want1.regexpLink, sl.ShortLink, "Short URL doesn't match the pattern")
+				//lk := app.ShortLink{}
+				//err = json.Unmarshal(body, &lk)
+				//require.NoError(t, err)
 
-				requestShortURL := httptest.NewRequest(http.MethodGet, sl.ShortLink, strings.NewReader(tt.request.originalURL))
+				link := string(body)
+				assert.Regexp(t, tt.want1.regexpLink, link, "Short URL doesn't match the pattern")
+
+				requestShortURL := httptest.NewRequest(http.MethodGet, link, strings.NewReader(tt.request.originalURL))
 				resultShort := SendRequest(requestShortURL, app.GetFullURLByFullURL)
 
 				assert.Equal(t, http.StatusTemporaryRedirect, resultShort.StatusCode)

@@ -14,9 +14,7 @@ func init() {
 	HostShortURLs = "http://localhost:8080/"
 }
 
-type ShortLink struct {
-	ShortLink string
-}
+type ShortLink string
 
 func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 
@@ -35,7 +33,7 @@ func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 	shortLink := HostShortURLs + storage.GetURLShort(link)
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusCreated)
-	resp, err := json.Marshal(ShortLink{ShortLink: shortLink})
+	resp, err := json.Marshal(shortLink)
 	if err != nil {
 		http.Error(writer, err.Error(), 500)
 		return
