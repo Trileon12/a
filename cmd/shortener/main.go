@@ -15,6 +15,6 @@ func main() {
 
 	app.InitApp(s, &conf)
 
-	app.StartHttpServer()
+	app.StartHTTPServer()
 
 }

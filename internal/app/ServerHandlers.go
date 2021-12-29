@@ -67,7 +67,7 @@ func InitApp(s *storage.Storage, cfg *storage.Config) {
 	conf = cfg
 }
 
-func StartHttpServer() {
+func StartHTTPServer() {
 
 	r := chi.NewRouter()
 
