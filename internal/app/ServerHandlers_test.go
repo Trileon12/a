@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"github.com/Trileon12/a/internal/app"
+	"github.com/Trileon12/a/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,6 +34,15 @@ type tstRequest struct {
 }
 
 func TestGetShortURL(t *testing.T) {
+
+	conf := storage.Config{
+		MaxLength:     6,
+		HostShortURLs: "http://localhost:8080/",
+	}
+
+	s := storage.New(&conf)
+
+	app.InitApp(s, &conf)
 
 	tests := []tstRequest{
 		{
@@ -72,7 +82,7 @@ func TestGetShortURL(t *testing.T) {
 			},
 			want1: want{
 				contentType: "text/plain; charset=utf-8",
-				statusCode:  http.StatusInternalServerError,
+				statusCode:  http.StatusBadRequest,
 				regexpLink:  "",
 			}},
 	}
@@ -105,7 +115,7 @@ func TestGetShortURL(t *testing.T) {
 				assert.Regexp(t, tt.want1.regexpLink, link, "Short URL doesn't match the pattern")
 
 				requestShortURL := httptest.NewRequest(http.MethodGet, link, strings.NewReader(tt.request.originalURL))
-				resultShort := SendRequest(requestShortURL, app.GetFullURLByFullURL)
+				resultShort := SendRequest(requestShortURL, app.GetFullURLByShortURL)
 
 				assert.Equal(t, http.StatusTemporaryRedirect, resultShort.StatusCode)
 				assert.Equal(t, tt.request.originalURL, resultShort.Header.Get("Location"), "Sent and got link is different")
@@ -120,7 +130,14 @@ func TestGetShortURL(t *testing.T) {
 }
 
 func TestShortURL(t *testing.T) {
+	conf := storage.Config{
+		MaxLength:     6,
+		HostShortURLs: "http://localhost:8080/",
+	}
 
+	s := storage.New(&conf)
+
+	app.InitApp(s, &conf)
 	tests := []tstRequest{
 		{
 
@@ -141,7 +158,7 @@ func TestShortURL(t *testing.T) {
 		t.Run(tt.nameTest, func(t *testing.T) {
 
 			request := httptest.NewRequest(tt.request.method, tt.request.url, strings.NewReader(tt.request.originalURL))
-			result := SendRequest(request, app.GetFullURLByFullURL)
+			result := SendRequest(request, app.GetFullURLByShortURL)
 
 			assert.Equal(t, tt.want1.statusCode, result.StatusCode)
 

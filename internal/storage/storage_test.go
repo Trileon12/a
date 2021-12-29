@@ -11,6 +11,14 @@ func TestGetOriginalURL(t *testing.T) {
 	type args struct {
 		shortURL string
 	}
+
+	conf := storage.Config{
+		MaxLength:     6,
+		HostShortURLs: "http://localhost:8080/",
+	}
+
+	s := storage.New(&conf)
+
 	tests := []struct {
 		name string
 		args args
@@ -30,9 +38,9 @@ func TestGetOriginalURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			shortURL := storage.GetURLShort(tt.args.shortURL)
+			shortURL := s.GetURLShort(tt.args.shortURL)
 
-			got, err := storage.GetOriginalURL(shortURL)
+			got, err := s.GetOriginalURL(shortURL)
 
 			require.NoError(t, err)
 			require.Equal(t, tt.args.shortURL, got)
@@ -45,6 +53,14 @@ func TestGetOriginalURLErr(t *testing.T) {
 	type args struct {
 		shortURL string
 	}
+
+	conf := storage.Config{
+		MaxLength:     6,
+		HostShortURLs: "http://localhost:8080/",
+	}
+
+	s := storage.New(&conf)
+
 	tests := []struct {
 		name string
 		args args
@@ -61,7 +77,7 @@ func TestGetOriginalURLErr(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			_, err := storage.GetOriginalURL(tt.args.shortURL)
+			_, err := s.GetOriginalURL(tt.args.shortURL)
 
 			require.Error(t, err)
 
@@ -73,6 +89,13 @@ func TestGetURLShort(t *testing.T) {
 	type args struct {
 		originalURL string
 	}
+	conf := storage.Config{
+		MaxLength:     10,
+		HostShortURLs: "http://localhost:8080/",
+	}
+
+	s := storage.New(&conf)
+
 	tests := []struct {
 		name string
 		args args
@@ -81,17 +104,17 @@ func TestGetURLShort(t *testing.T) {
 		{
 			name: "std url",
 			args: args{originalURL: "www.google.com"},
-			want: "[[:alpha:]]{6}$",
+			want: "[[:alpha:]]{10}$",
 		},
 		{
 			name: "bad url",
 			args: args{originalURL: "bla bla bla"},
-			want: "[[:alpha:]]{6}$",
+			want: "[[:alpha:]]{10}$",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := storage.GetURLShort(tt.args.originalURL)
+			got := s.GetURLShort(tt.args.originalURL)
 			assert.Regexp(t, tt.want, got, "Random Str doesn't match the pattern")
 		})
 	}

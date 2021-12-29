@@ -4,46 +4,55 @@ import (
 	"errors"
 )
 
-var URLs map[string]string
-var URLsRevers map[string]string
-
-func init() {
-	URLs = make(map[string]string)
-
+type Config struct {
+	MaxLength     int
+	HostShortURLs string
 }
 
-const shortURLLen = 6
+type Storage struct {
+	conf       *Config
+	URLs       map[string]string
+	URLsRevers map[string]string
+}
+
+func New(conf *Config) *Storage {
+	return &Storage{
+		conf:       conf,
+		URLs:       make(map[string]string),
+		URLsRevers: make(map[string]string),
+	}
+}
 
 //Create and return short url for given original URL. Return the same short url for the same orginal URL
-func GetURLShort(originalURL string) string {
+func (s *Storage) GetURLShort(originalURL string) string {
 
-	if shortURL, isExists := URLsRevers[originalURL]; isExists {
+	if shortURL, isExists := s.URLsRevers[originalURL]; isExists {
 		return shortURL
 	}
 
-	shortURL := getUnicURL()
-	URLs[shortURL] = originalURL
+	shortURL := s.getUnicURL()
+	s.URLs[shortURL] = originalURL
 
 	return shortURL
 }
 
 //Func returns original url by short url
-func GetOriginalURL(shortURL string) (string, error) {
+func (s *Storage) GetOriginalURL(shortURL string) (string, error) {
 
-	if originalURL, isExists := URLs[shortURL]; isExists {
+	if originalURL, isExists := s.URLs[shortURL]; isExists {
 		return originalURL, nil
 	} else {
 		return "", errors.New("URL не найден")
 	}
 }
 
-func getUnicURL() string {
+func (s *Storage) getUnicURL() string {
 
 	found := false
-	shortURL := RandString(shortURLLen)
+	shortURL := RandString(s.conf.MaxLength)
 
-	for _, found = URLs[shortURL]; found; {
-		shortURL = RandString(shortURLLen)
+	for _, found = s.URLs[shortURL]; found; {
+		shortURL = RandString(s.conf.MaxLength)
 	}
 	return shortURL
 }

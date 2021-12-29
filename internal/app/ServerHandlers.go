@@ -1,37 +1,44 @@
 package app
 
 import (
+	"context"
 	"github.com/Trileon12/a/internal/storage"
+	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
+	"net/url"
+	"os"
+	"os/signal"
 	"path"
+	"syscall"
+	"time"
 )
 
-var HostShortURLs string
-
-func init() {
-	HostShortURLs = "http://localhost:8080/"
-}
-
-type shortLink struct {
-	shortLink string
-}
+var strorage *storage.Storage
+var conf *storage.Config
 
 func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 
 	b, err := io.ReadAll(request.Body)
 	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	link := string(b)
 
 	if link == "" {
-		http.Error(writer, "Body is empty", http.StatusInternalServerError)
+		http.Error(writer, "Body is empty", http.StatusBadRequest)
 		return
 	}
-	shortLink := HostShortURLs + storage.GetURLShort(link)
+
+	u, err := url.Parse(conf.HostShortURLs)
+	if err != nil {
+		http.Error(writer, "I made bad URL, sorry", http.StatusBadRequest)
+	}
+	u.Path = strorage.GetURLShort(link)
+
+	shortLink := u.String()
 	writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	writer.WriteHeader(http.StatusCreated)
 
@@ -41,11 +48,11 @@ func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func GetFullURLByFullURL(writer http.ResponseWriter, request *http.Request) {
+func GetFullURLByShortURL(writer http.ResponseWriter, request *http.Request) {
 
 	id := path.Base(request.URL.Path)
 
-	URL, err := storage.GetOriginalURL(id)
+	URL, err := strorage.GetOriginalURL(id)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusNotFound)
 		return
@@ -53,4 +60,39 @@ func GetFullURLByFullURL(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Location", URL)
 	writer.WriteHeader(http.StatusTemporaryRedirect)
 
+}
+
+func InitApp(s *storage.Storage, cfg *storage.Config) {
+	strorage = s
+	conf = cfg
+}
+
+func StartHttpServer() {
+
+	r := chi.NewRouter()
+
+	r.Post("/", GetShortURL)
+	r.Get("/{ID}", GetFullURLByShortURL)
+
+	srv := &http.Server{Addr: ":8080", Handler: r}
+
+	go func() {
+		// always returns error. ErrServerClosed on graceful close
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			println("Fatal error ", err)
+		}
+	}()
+
+	// Setting up signal capturing
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	// Waiting for SIGINT (kill -2)
+	<-stop
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		println("Shutdown fail", err)
+	}
 }
