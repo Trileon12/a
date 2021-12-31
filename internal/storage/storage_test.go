@@ -1,6 +1,7 @@
 package storage_test
 
 import (
+	"github.com/Trileon12/a/internal/config"
 	"github.com/Trileon12/a/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -12,12 +13,8 @@ func TestGetOriginalURL(t *testing.T) {
 		shortURL string
 	}
 
-	conf := storage.Config{
-		MaxLength:     6,
-		HostShortURLs: "http://localhost:8080/",
-	}
-
-	s := storage.New(&conf)
+	conf := config.New()
+	s := storage.New(&conf.Storage)
 
 	tests := []struct {
 		name string
@@ -54,12 +51,8 @@ func TestGetOriginalURLErr(t *testing.T) {
 		shortURL string
 	}
 
-	conf := storage.Config{
-		MaxLength:     6,
-		HostShortURLs: "http://localhost:8080/",
-	}
-
-	s := storage.New(&conf)
+	conf := config.New()
+	s := storage.New(&conf.Storage)
 
 	tests := []struct {
 		name string
@@ -89,12 +82,8 @@ func TestGetURLShort(t *testing.T) {
 	type args struct {
 		originalURL string
 	}
-	conf := storage.Config{
-		MaxLength:     10,
-		HostShortURLs: "http://localhost:8080/",
-	}
-
-	s := storage.New(&conf)
+	conf := config.New()
+	s := storage.New(&conf.Storage)
 
 	tests := []struct {
 		name string
@@ -104,12 +93,12 @@ func TestGetURLShort(t *testing.T) {
 		{
 			name: "std url",
 			args: args{originalURL: "www.google.com"},
-			want: "[[:alpha:]]{10}$",
+			want: "[[:alpha:]]{6}$",
 		},
 		{
 			name: "bad url",
 			args: args{originalURL: "bla bla bla"},
-			want: "[[:alpha:]]{10}$",
+			want: "[[:alpha:]]{6}$",
 		},
 	}
 	for _, tt := range tests {

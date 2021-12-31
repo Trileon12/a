@@ -2,19 +2,17 @@ package main
 
 import (
 	"github.com/Trileon12/a/internal/app"
+	"github.com/Trileon12/a/internal/config"
 	"github.com/Trileon12/a/internal/storage"
 )
 
 func main() {
-	conf := storage.Config{
-		MaxLength:     6,
-		HostShortURLs: "http://localhost:8080/",
-	}
+	conf := config.New()
 
-	s := storage.New(&conf)
+	s := storage.New(&conf.Storage)
 
-	app.InitApp(s, &conf)
+	application := app.New(&conf.App, s)
 
-	app.StartHTTPServer()
+	application.StartHTTPServer()
 
 }

@@ -5,8 +5,7 @@ import (
 )
 
 type Config struct {
-	MaxLength     int
-	HostShortURLs string
+	MaxLength int
 }
 
 type Storage struct {

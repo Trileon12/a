@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"github.com/Trileon12/a/internal/app"
+	"github.com/Trileon12/a/internal/config"
 	"github.com/Trileon12/a/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
@@ -35,14 +36,9 @@ type tstRequest struct {
 
 func TestGetShortURL(t *testing.T) {
 
-	conf := storage.Config{
-		MaxLength:     6,
-		HostShortURLs: "http://localhost:8080/",
-	}
-
-	s := storage.New(&conf)
-
-	app.InitApp(s, &conf)
+	conf := config.New()
+	s := storage.New(&conf.Storage)
+	application := app.New(&conf.App, s)
 
 	tests := []tstRequest{
 		{
@@ -95,7 +91,7 @@ func TestGetShortURL(t *testing.T) {
 		t.Run(tt.nameTest, func(t *testing.T) {
 
 			request := httptest.NewRequest(tt.request.method, tt.request.url, strings.NewReader(tt.request.originalURL))
-			result := SendRequest(request, app.GetShortURL)
+			result := SendRequest(request, application.GetShortURL)
 
 			assert.Equal(t, tt.want1.statusCode, result.StatusCode)
 			if result.StatusCode == http.StatusCreated {
@@ -115,7 +111,7 @@ func TestGetShortURL(t *testing.T) {
 				assert.Regexp(t, tt.want1.regexpLink, link, "Short URL doesn't match the pattern")
 
 				requestShortURL := httptest.NewRequest(http.MethodGet, link, strings.NewReader(tt.request.originalURL))
-				resultShort := SendRequest(requestShortURL, app.GetFullURLByShortURL)
+				resultShort := SendRequest(requestShortURL, application.GetFullURLByShortURL)
 
 				assert.Equal(t, http.StatusTemporaryRedirect, resultShort.StatusCode)
 				assert.Equal(t, tt.request.originalURL, resultShort.Header.Get("Location"), "Sent and got link is different")
@@ -130,14 +126,11 @@ func TestGetShortURL(t *testing.T) {
 }
 
 func TestShortURL(t *testing.T) {
-	conf := storage.Config{
-		MaxLength:     6,
-		HostShortURLs: "http://localhost:8080/",
-	}
 
-	s := storage.New(&conf)
+	conf := config.New()
+	s := storage.New(&conf.Storage)
+	application := app.New(&conf.App, s)
 
-	app.InitApp(s, &conf)
 	tests := []tstRequest{
 		{
 
@@ -158,7 +151,7 @@ func TestShortURL(t *testing.T) {
 		t.Run(tt.nameTest, func(t *testing.T) {
 
 			request := httptest.NewRequest(tt.request.method, tt.request.url, strings.NewReader(tt.request.originalURL))
-			result := SendRequest(request, app.GetFullURLByShortURL)
+			result := SendRequest(request, application.GetFullURLByShortURL)
 
 			assert.Equal(t, tt.want1.statusCode, result.StatusCode)
 

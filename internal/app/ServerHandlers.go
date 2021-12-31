@@ -10,14 +10,28 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strconv"
 	"syscall"
 	"time"
 )
 
-var strorage *storage.Storage
-var conf *storage.Config
+type Config struct {
+	HostShortURLs   string
+	Port            int
+	ShutdownTimeout time.Duration
+}
 
-func GetShortURL(writer http.ResponseWriter, request *http.Request) {
+type App struct {
+	conf    *Config
+	storage *storage.Storage
+}
+
+func New(conf *Config, storage *storage.Storage) *App {
+	return &App{conf, storage}
+}
+
+// Get short URL for full url
+func (a *App) GetShortURL(writer http.ResponseWriter, request *http.Request) {
 
 	b, err := io.ReadAll(request.Body)
 	if err != nil {
@@ -32,11 +46,11 @@ func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	u, err := url.Parse(conf.HostShortURLs)
+	u, err := url.Parse(a.conf.HostShortURLs)
 	if err != nil {
 		http.Error(writer, "I made bad URL, sorry", http.StatusBadRequest)
 	}
-	u.Path = strorage.GetURLShort(link)
+	u.Path = a.storage.GetURLShort(link)
 
 	shortLink := u.String()
 	writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -44,15 +58,17 @@ func GetShortURL(writer http.ResponseWriter, request *http.Request) {
 
 	_, err = writer.Write([]byte(shortLink))
 	if err != nil {
+		http.Error(writer, "I have short URL, but not for you", http.StatusBadRequest)
 		return
 	}
 }
 
-func GetFullURLByShortURL(writer http.ResponseWriter, request *http.Request) {
+// Get full URL by short URL
+func (a *App) GetFullURLByShortURL(writer http.ResponseWriter, request *http.Request) {
 
 	id := path.Base(request.URL.Path)
 
-	URL, err := strorage.GetOriginalURL(id)
+	URL, err := a.storage.GetOriginalURL(id)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusNotFound)
 		return
@@ -62,19 +78,9 @@ func GetFullURLByShortURL(writer http.ResponseWriter, request *http.Request) {
 
 }
 
-func InitApp(s *storage.Storage, cfg *storage.Config) {
-	strorage = s
-	conf = cfg
-}
+func (a *App) StartHTTPServer() {
 
-func StartHTTPServer() {
-
-	r := chi.NewRouter()
-
-	r.Post("/", GetShortURL)
-	r.Get("/{ID}", GetFullURLByShortURL)
-
-	srv := &http.Server{Addr: ":8080", Handler: r}
+	srv := a.Routing()
 
 	go func() {
 		// always returns error. ErrServerClosed on graceful close
@@ -90,9 +96,19 @@ func StartHTTPServer() {
 	// Waiting for SIGINT (kill -2)
 	<-stop
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), a.conf.ShutdownTimeout)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		println("Shutdown fail", err)
 	}
+}
+
+func (a *App) Routing() *http.Server {
+	r := chi.NewRouter()
+
+	r.Post("/", a.GetShortURL)
+	r.Get("/{ID}", a.GetFullURLByShortURL)
+
+	srv := &http.Server{Addr: ":" + strconv.Itoa(a.conf.Port), Handler: r}
+	return srv
 }
