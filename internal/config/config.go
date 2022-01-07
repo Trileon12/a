@@ -32,7 +32,7 @@ func GetStorageConfig(err error) storage.Config {
 		log.Fatal(err)
 	}
 
-	if isFlagPassed("a") {
+	if isFlagPassed("f") {
 		flag.StringVar(&cfgStorage.FilePath, "f", "", "path to crazy db")
 	}
 
