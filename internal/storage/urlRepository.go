@@ -27,8 +27,8 @@ func New(conf *Config) *Storage {
 	}
 	if len(conf.FilePath) > 0 {
 		ExtractJsonUrlData(conf.FilePath, &s.URLs)
-
-		jsonFile, err := os.Open(conf.FilePath)
+		flag1 := os.O_WRONLY | os.O_CREATE | os.O_APPEND
+		jsonFile, err := os.OpenFile(conf.FilePath, flag1, 0777)
 		if err != nil {
 			return s
 		}
