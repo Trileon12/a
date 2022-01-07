@@ -11,14 +11,13 @@ import (
 	"os"
 	"os/signal"
 	"path"
-	"strconv"
 	"syscall"
 	"time"
 )
 
 type Config struct {
 	HostShortURLs   string `env:"BASE_URL" envDefault:"http://localhost:8080/"`
-	Port            int    `env:"SERVER_ADDRESS" envDefault:"8080"`
+	Port            string `env:"SERVER_ADDRESS" envDefault:":8080"`
 	ShutdownTimeout time.Duration
 }
 
@@ -153,6 +152,6 @@ func (a *App) Routing() *http.Server {
 	r.Post("/api/shorten", a.GetShortURLJson)
 	r.Get("/{ID}", a.GetFullURLByShortURL)
 
-	srv := &http.Server{Addr: ":" + strconv.Itoa(a.conf.Port), Handler: r}
+	srv := &http.Server{Addr: a.conf.Port, Handler: r}
 	return srv
 }
