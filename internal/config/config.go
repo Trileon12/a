@@ -26,7 +26,7 @@ func New() *Config {
 }
 
 func GetStorageConfig(err error) storage.Config {
-	var cfgStorage storage.Config
+	cfgStorage := storage.Config{}
 	err = env.Parse(&cfgStorage)
 	if err != nil {
 		log.Fatal(err)
@@ -41,7 +41,7 @@ func GetStorageConfig(err error) storage.Config {
 }
 
 func GetAppConfig() (app.Config, error) {
-	var cfgApp app.Config
+	cfgApp := app.Config{}
 
 	err := env.Parse(&cfgApp)
 	if err != nil {
