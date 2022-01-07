@@ -52,8 +52,8 @@ func New() *Config {
 func getFlagValue(f string) string {
 	var res string
 	if flag.Lookup(f) == nil {
-		res = *flag.String(f, "default", "")
+		_ = *flag.String(f, "default", "")
 	}
-	res = flag.Lookup("b").Value.(flag.Getter).Get().(string)
+	res = flag.Lookup(f).Value.(flag.Getter).Get().(string)
 	return res
 }
