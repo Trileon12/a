@@ -29,27 +29,31 @@ func New() *Config {
 		log.Fatal(err)
 	}
 	cfgStorage.MaxLength = 6
-	var b string
-	if flag.Lookup("b") == nil {
-		b = *flag.String("b", "default", "base url")
-	}
-	b = flag.Lookup("b").Value.(flag.Getter).Get().(string)
-
-	a := flag.String("a", "default", "server url")
-	f := flag.String("f", "default", "base url")
+	b := getFlagValue("b")
+	a := getFlagValue("a")
+	f := getFlagValue("f")
 	flag.Parse()
 	if b != "default" {
 		cfgApp.HostShortURLs = b
 	}
-	if *a != "default" {
-		cfgApp.ServerAdress = *a
+	if a != "default" {
+		cfgApp.ServerAdress = a
 	}
-	if *f != "default" {
-		cfgStorage.FilePath = *f
+	if f != "default" {
+		cfgStorage.FilePath = f
 	}
 
 	return &Config{
 		Storage: cfgStorage,
 		App:     cfgApp,
 	}
+}
+
+func getFlagValue(f string) string {
+	var res string
+	if flag.Lookup(f) == nil {
+		res = *flag.String(f, "default", "")
+	}
+	res = flag.Lookup("b").Value.(flag.Getter).Get().(string)
+	return res
 }
