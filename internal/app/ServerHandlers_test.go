@@ -1,6 +1,8 @@
 package app_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/Trileon12/a/internal/app"
 	"github.com/Trileon12/a/internal/config"
 	"github.com/Trileon12/a/internal/storage"
@@ -26,6 +28,7 @@ type request struct {
 	method      string
 	url         string
 	originalURL string
+	jsonFormat  bool
 }
 
 type tstRequest struct {
@@ -51,6 +54,21 @@ func TestGetShortURL(t *testing.T) {
 			},
 			want1: want{
 				contentType: "text/plain; charset=utf-8",
+				statusCode:  http.StatusCreated,
+				regexpLink:  "^" + host + "[[:alpha:]]{6}$",
+			},
+		},
+		{
+
+			nameTest: "Get standard URL JSON _",
+			request: request{
+				method:      http.MethodPost,
+				url:         "/api/shorten",
+				originalURL: "www.google.com",
+				jsonFormat:  true,
+			},
+			want1: want{
+				contentType: "application/json",
 				statusCode:  http.StatusCreated,
 				regexpLink:  "^" + host + "[[:alpha:]]{6}$",
 			},
@@ -90,24 +108,35 @@ func TestGetShortURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.nameTest, func(t *testing.T) {
 
-			request := httptest.NewRequest(tt.request.method, tt.request.url, strings.NewReader(tt.request.originalURL))
-			result := SendRequest(request, application.GetShortURL)
+			var request *http.Request
+			var result *http.Response
+			if tt.request.jsonFormat {
+				user := &app.ShortURLRequest{Url: tt.request.originalURL}
+				b, _ := json.Marshal(user)
+				request = httptest.NewRequest(tt.request.method, tt.request.url, bytes.NewBuffer(b))
+				result = SendRequest(request, application.GetShortURLJson)
+			} else {
+				request = httptest.NewRequest(tt.request.method, tt.request.url, strings.NewReader(tt.request.originalURL))
+				result = SendRequest(request, application.GetShortURL)
+			}
 
 			assert.Equal(t, tt.want1.statusCode, result.StatusCode)
 			if result.StatusCode == http.StatusCreated {
 				assert.Equal(t, tt.want1.contentType, result.Header.Get("Content-Type"))
-				body, err := ioutil.ReadAll(result.Body)
-				require.NoError(t, err)
-				defer result.Body.Close()
-				//if err != nil {
-				//	assert.Error(t, err, "Error on read body after create short link")
-				//}
 
-				//lk := app.ShortLink{}
-				//err = json.Unmarshal(body, &lk)
-				//require.NoError(t, err)
-
-				link := string(body)
+				var link string
+				if tt.request.jsonFormat {
+					var b app.ShortURLResponse
+					if err := json.NewDecoder(result.Body).Decode(&b); err != nil {
+						assert.Error(t, err, "Can't get JSON response")
+					}
+					link = b.Result
+				} else {
+					body, err := ioutil.ReadAll(result.Body)
+					require.NoError(t, err)
+					defer result.Body.Close()
+					link = string(body)
+				}
 				assert.Regexp(t, tt.want1.regexpLink, link, "Short URL doesn't match the pattern")
 
 				requestShortURL := httptest.NewRequest(http.MethodGet, link, strings.NewReader(tt.request.originalURL))
