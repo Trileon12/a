@@ -59,7 +59,7 @@ func (s *Storage) SaveData() {
 			log.Fatal(err)
 			return
 		}
-		err = ioutil.WriteFile(s.conf.FilePath, jsonString, 0644)
+		_ = ioutil.WriteFile(s.conf.FilePath, jsonString, 0644)
 
 	}
 }

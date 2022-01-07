@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/Trileon12/a/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"io"
@@ -127,7 +128,7 @@ func (a *App) StartHTTPServer() {
 	go func() {
 		// always returns error. ErrServerClosed on graceful close
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-			println("Fatal error ", err)
+			fmt.Println("Fatal  error ", err)
 		}
 	}()
 

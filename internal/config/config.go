@@ -19,6 +19,20 @@ func New() *Config {
 	cfgApp, err := GetAppConfig()
 	cfgStorage := GetStorageConfig(err)
 
+	b := flag.String("b", "default", "base url")
+	a := flag.String("a", "default", "server url")
+	f := flag.String("f", "default", "base url")
+	flag.Parse()
+	if *b != "default" {
+		cfgApp.HostShortURLs = *b
+	}
+	if *a != "default" {
+		cfgApp.ServerAdress = *a
+	}
+	if *f != "default" {
+		cfgStorage.FilePath = *f
+	}
+
 	return &Config{
 		Storage: cfgStorage,
 		App:     cfgApp,
@@ -26,14 +40,11 @@ func New() *Config {
 }
 
 func GetStorageConfig(err error) storage.Config {
-	cfgStorage := storage.Config{}
+
+	var cfgStorage storage.Config
 	err = env.Parse(&cfgStorage)
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	if isFlagPassed("f") {
-		flag.StringVar(&cfgStorage.FilePath, "f", "", "path to crazy db")
 	}
 
 	cfgStorage.MaxLength = 6
@@ -41,29 +52,13 @@ func GetStorageConfig(err error) storage.Config {
 }
 
 func GetAppConfig() (app.Config, error) {
-	cfgApp := app.Config{}
+	var cfgApp app.Config
 
 	err := env.Parse(&cfgApp)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if isFlagPassed("b") {
-		flag.StringVar(&cfgApp.HostShortURLs, "b", "http://localhost:8080/", "base url")
-	}
-	if isFlagPassed("a") {
-		flag.StringVar(&cfgApp.ServerAdress, "a", ":8080", "server url")
-	}
 
 	cfgApp.ShutdownTimeout = 5 * time.Second
 	return cfgApp, err
-}
-
-func isFlagPassed(name string) bool {
-	found := false
-	flag.Visit(func(f *flag.Flag) {
-		if f.Name == name {
-			found = true
-		}
-	})
-	return found
 }
