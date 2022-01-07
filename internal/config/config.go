@@ -16,8 +16,8 @@ type Config struct {
 
 func New() *Config {
 
-	cfgApp, err := GetAppConfig()
-	cfgStorage := GetStorageConfig(err)
+	cfgApp := GetAppConfig()
+	cfgStorage := GetStorageConfig()
 
 	b := flag.String("b", "default", "base url")
 	a := flag.String("a", "default", "server url")
@@ -39,10 +39,10 @@ func New() *Config {
 	}
 }
 
-func GetStorageConfig(err error) storage.Config {
+func GetStorageConfig() storage.Config {
 
 	var cfgStorage storage.Config
-	err = env.Parse(&cfgStorage)
+	err := env.Parse(&cfgStorage)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func GetStorageConfig(err error) storage.Config {
 	return cfgStorage
 }
 
-func GetAppConfig() (app.Config, error) {
+func GetAppConfig() app.Config {
 	var cfgApp app.Config
 
 	err := env.Parse(&cfgApp)
@@ -60,5 +60,5 @@ func GetAppConfig() (app.Config, error) {
 	}
 
 	cfgApp.ShutdownTimeout = 5 * time.Second
-	return cfgApp, err
+	return cfgApp
 }
