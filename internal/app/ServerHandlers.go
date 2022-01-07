@@ -17,8 +17,8 @@ import (
 )
 
 type Config struct {
-	HostShortURLs   string `env:"BASE_URL"`
-	Port            int    `env:"SERVER_ADDRESS"`
+	HostShortURLs   string `env:"BASE_URL,required"`
+	Port            int    `env:"SERVER_ADDRESS,required"`
 	ShutdownTimeout time.Duration
 }
 

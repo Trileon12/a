@@ -7,12 +7,11 @@ import (
 )
 
 func main() {
-	conf := config.New()
 
+	conf := config.New()
 	s := storage.New(&conf.Storage)
 
 	application := app.New(&conf.App, s)
-
 	application.StartHTTPServer()
 
 }
