@@ -17,8 +17,8 @@ import (
 )
 
 type Config struct {
-	HostShortURLs   string `env:"BASE_URL,required"`
-	Port            int    `env:"SERVER_ADDRESS,required"`
+	HostShortURLs   string `env:"BASE_URL" envDefault:"http://localhost:8080/"`
+	Port            int    `env:"SERVER_ADDRESS" envDefault:"8080"`
 	ShutdownTimeout time.Duration
 }
 
