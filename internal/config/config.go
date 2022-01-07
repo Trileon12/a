@@ -22,8 +22,15 @@ func New() *Config {
 	}
 	cfgApp.ShutdownTimeout = 5 * time.Second
 
+	var cfgStorage storage.Config
+	err = env.Parse(&cfgStorage)
+	if err != nil {
+		log.Fatal(err)
+	}
+	cfgStorage.MaxLength = 6
+
 	return &Config{
-		Storage: storage.Config{MaxLength: 6},
+		Storage: cfgStorage,
 		App:     cfgApp,
 	}
 }

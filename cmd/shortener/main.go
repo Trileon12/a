@@ -10,7 +10,7 @@ func main() {
 
 	conf := config.New()
 	s := storage.New(&conf.Storage)
-
+	defer s.SaveData()
 	application := app.New(&conf.App, s)
 	application.StartHTTPServer()
 
