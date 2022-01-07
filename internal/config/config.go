@@ -29,13 +29,17 @@ func New() *Config {
 		log.Fatal(err)
 	}
 	cfgStorage.MaxLength = 6
+	var b string
+	if flag.Lookup("b") == nil {
+		b = *flag.String("b", "default", "base url")
+	}
+	b = flag.Lookup("b").Value.(flag.Getter).Get().(string)
 
-	b := flag.String("b", "default", "base url")
 	a := flag.String("a", "default", "server url")
 	f := flag.String("f", "default", "base url")
 	flag.Parse()
-	if *b != "default" {
-		cfgApp.HostShortURLs = *b
+	if b != "default" {
+		cfgApp.HostShortURLs = b
 	}
 	if *a != "default" {
 		cfgApp.ServerAdress = *a
