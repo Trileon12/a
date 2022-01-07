@@ -28,7 +28,7 @@ type App struct {
 }
 
 type ShortURLRequest struct {
-	Url string `json:"url"`
+	URL string `json:"url"`
 }
 
 type ShortURLResponse struct {
@@ -82,8 +82,8 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	if b.Url == "" {
-		http.Error(writer, "Url is empty", http.StatusBadRequest)
+	if b.URL == "" {
+		http.Error(writer, "URL is empty", http.StatusBadRequest)
 		return
 	}
 
@@ -91,7 +91,7 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 	if err != nil {
 		http.Error(writer, "I made bad URL, sorry", http.StatusBadRequest)
 	}
-	u.Path = a.storage.GetURLShort(b.Url)
+	u.Path = a.storage.GetURLShort(b.URL)
 
 	resp := ShortURLResponse{}
 	resp.Result = u.String()

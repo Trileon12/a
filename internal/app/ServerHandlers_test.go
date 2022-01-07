@@ -111,7 +111,7 @@ func TestGetShortURL(t *testing.T) {
 			var request *http.Request
 			var result *http.Response
 			if tt.request.jsonFormat {
-				user := &app.ShortURLRequest{Url: tt.request.originalURL}
+				user := &app.ShortURLRequest{URL: tt.request.originalURL}
 				b, _ := json.Marshal(user)
 				request = httptest.NewRequest(tt.request.method, tt.request.url, bytes.NewBuffer(b))
 				result = SendRequest(request, application.GetShortURLJson)
