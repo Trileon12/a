@@ -9,6 +9,22 @@ import (
 	"time"
 )
 
+var a string
+var b string
+var f string
+
+func init() {
+	if flag.Lookup("a") == nil {
+		flag.StringVar(&a, "a", "default", "")
+	}
+	if flag.Lookup("b") == nil {
+		flag.StringVar(&b, "b", "default", "")
+	}
+	if flag.Lookup("f") == nil {
+		flag.StringVar(&f, "f", "default", "")
+	}
+}
+
 type Config struct {
 	Storage storage.Config
 	App     app.Config
@@ -29,9 +45,9 @@ func New() *Config {
 		log.Fatal(err)
 	}
 	cfgStorage.MaxLength = 6
-	b := getFlagValue("b")
-	a := getFlagValue("a")
-	f := getFlagValue("f")
+	a = flag.Lookup("a").Value.(flag.Getter).Get().(string)
+	b = flag.Lookup("b").Value.(flag.Getter).Get().(string)
+	f = flag.Lookup("f").Value.(flag.Getter).Get().(string)
 	flag.Parse()
 	if b != "default" {
 		cfgApp.HostShortURLs = b
@@ -47,13 +63,4 @@ func New() *Config {
 		Storage: cfgStorage,
 		App:     cfgApp,
 	}
-}
-
-func getFlagValue(f string) string {
-	var res string
-	if flag.Lookup(f) == nil {
-		_ = *flag.String(f, "default", "")
-	}
-	res = flag.Lookup(f).Value.(flag.Getter).Get().(string)
-	return res
 }
