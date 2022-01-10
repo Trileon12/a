@@ -9,19 +9,19 @@ import (
 	"time"
 )
 
-var a string
-var b string
-var f string
+var paramA string
+var paramB string
+var paramF string
 
 func init() {
 	if flag.Lookup("a") == nil {
-		flag.StringVar(&a, "a", "default", "")
+		flag.StringVar(&paramA, "a", "default", "")
 	}
 	if flag.Lookup("b") == nil {
-		flag.StringVar(&b, "b", "default", "")
+		flag.StringVar(&paramB, "b", "default", "")
 	}
 	if flag.Lookup("f") == nil {
-		flag.StringVar(&f, "f", "default", "")
+		flag.StringVar(&paramF, "f", "default", "")
 	}
 }
 
@@ -45,18 +45,18 @@ func New() *Config {
 		log.Fatal(err)
 	}
 	cfgStorage.MaxLength = 6
-	a = flag.Lookup("a").Value.(flag.Getter).Get().(string)
-	b = flag.Lookup("b").Value.(flag.Getter).Get().(string)
-	f = flag.Lookup("f").Value.(flag.Getter).Get().(string)
+	paramA = flag.Lookup("a").Value.(flag.Getter).Get().(string)
+	paramB = flag.Lookup("b").Value.(flag.Getter).Get().(string)
+	paramF = flag.Lookup("f").Value.(flag.Getter).Get().(string)
 	flag.Parse()
-	if b != "default" {
-		cfgApp.HostShortURLs = b
+	if paramB != "default" {
+		cfgApp.HostShortURLs = paramB
 	}
-	if a != "default" {
-		cfgApp.ServerAdress = a
+	if paramA != "default" {
+		cfgApp.ServerAdress = paramA
 	}
-	if f != "default" {
-		cfgStorage.FilePath = f
+	if paramF != "default" {
+		cfgStorage.FilePath = paramF
 	}
 
 	return &Config{
