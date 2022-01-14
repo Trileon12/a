@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	MaxLength int
+	MaxLength int    `env:"MaxLength" envDefault:"6"`
 	FilePath  string `env:"FILE_STORAGE_PATH"`
 }
 

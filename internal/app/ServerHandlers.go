@@ -17,9 +17,9 @@ import (
 )
 
 type Config struct {
-	HostShortURLs   string `env:"BASE_URL" envDefault:"http://localhost:8080/"`
-	ServerAdress    string `env:"SERVER_ADDRESS" envDefault:":8080"`
-	ShutdownTimeout time.Duration
+	HostShortURLs   string        `env:"BASE_URL" envDefault:"http://localhost:8080/"`
+	ServerAddress   string        `env:"SERVER_ADDRESS" envDefault:":8080"`
+	ShutdownTimeout time.Duration `env:"ShutdownTimeout" envDefault:"5s"`
 }
 
 type App struct {
@@ -153,6 +153,6 @@ func (a *App) Routing() *http.Server {
 	r.Post("/api/shorten", a.GetShortURLJson)
 	r.Get("/{ID}", a.GetFullURLByShortURL)
 
-	srv := &http.Server{Addr: a.conf.ServerAdress, Handler: r}
+	srv := &http.Server{Addr: a.conf.ServerAddress, Handler: r}
 	return srv
 }
