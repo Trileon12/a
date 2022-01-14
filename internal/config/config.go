@@ -26,7 +26,6 @@ func New() *Config {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cfgStorage.MaxLength = 6
 
 	flag.StringVar(&cfgApp.ServerAddress, "a", cfgApp.ServerAddress, "port to run server")
 	flag.StringVar(&cfgApp.HostShortURLs, "b", cfgApp.HostShortURLs, "base URL for shorten URL response")
