@@ -37,9 +37,15 @@ type tstRequest struct {
 	want1    want
 }
 
+var conf *config.Config
+
+func TestMain(m *testing.M) {
+	conf = config.New()
+	m.Run()
+}
+
 func TestGetShortURL(t *testing.T) {
 
-	conf := config.New()
 	s := storage.New(&conf.Storage)
 	application := app.New(&conf.App, s)
 
@@ -156,7 +162,6 @@ func TestGetShortURL(t *testing.T) {
 
 func TestShortURL(t *testing.T) {
 
-	conf := config.New()
 	s := storage.New(&conf.Storage)
 	application := app.New(&conf.App, s)
 
