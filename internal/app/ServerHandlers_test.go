@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 )
@@ -41,7 +42,10 @@ var conf *config.Config
 
 func TestMain(m *testing.M) {
 	conf = config.New()
-	m.Run()
+	appTsts := m.Run()
+
+	os.Exit(appTsts)
+
 }
 
 func TestGetShortURL(t *testing.T) {
