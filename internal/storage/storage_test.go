@@ -5,15 +5,25 @@ import (
 	"github.com/Trileon12/a/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"os"
 	"testing"
 )
+
+var conf *config.Config
+
+func TestMain(m *testing.M) {
+	conf = config.New()
+	appTsts := m.Run()
+
+	os.Exit(appTsts)
+
+}
 
 func TestGetOriginalURL(t *testing.T) {
 	type args struct {
 		shortURL string
 	}
 
-	conf := config.New()
 	s := storage.New(&conf.Storage)
 
 	tests := []struct {
@@ -51,7 +61,6 @@ func TestGetOriginalURLErr(t *testing.T) {
 		shortURL string
 	}
 
-	conf := config.New()
 	s := storage.New(&conf.Storage)
 
 	tests := []struct {
@@ -82,7 +91,7 @@ func TestGetURLShort(t *testing.T) {
 	type args struct {
 		originalURL string
 	}
-	conf := config.New()
+
 	s := storage.New(&conf.Storage)
 
 	tests := []struct {
