@@ -1,9 +1,11 @@
 package config
 
 import (
+	"flag"
 	"github.com/Trileon12/a/internal/app"
 	"github.com/Trileon12/a/internal/storage"
-	"time"
+	"github.com/caarlos0/env/v6"
+	"log"
 )
 
 type Config struct {
@@ -12,12 +14,26 @@ type Config struct {
 }
 
 func New() *Config {
+
+	var cfgApp app.Config
+	err := env.Parse(&cfgApp)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var cfgStorage storage.Config
+	err = env.Parse(&cfgStorage)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	flag.StringVar(&cfgApp.ServerAddress, "a", cfgApp.ServerAddress, "port to run server")
+	flag.StringVar(&cfgApp.HostShortURLs, "b", cfgApp.HostShortURLs, "base URL for shorten URL response")
+	flag.StringVar(&cfgStorage.FilePath, "f", cfgStorage.FilePath, "file to store shorten URLs")
+	flag.Parse()
+
 	return &Config{
-		Storage: storage.Config{MaxLength: 6},
-		App: app.Config{
-			HostShortURLs:   "http://localhost:8080/",
-			Port:            8080,
-			ShutdownTimeout: 5 * time.Second,
-		},
+		Storage: cfgStorage,
+		App:     cfgApp,
 	}
 }

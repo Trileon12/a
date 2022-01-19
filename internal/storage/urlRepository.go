@@ -1,37 +1,76 @@
 package storage
 
 import (
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
 type Config struct {
-	MaxLength int
+	MaxLength int    `env:"MaxLength" envDefault:"6"`
+	FilePath  string `env:"FILE_STORAGE_PATH"`
 }
 
+type URLsType map[string]string
+
 type Storage struct {
-	conf       *Config
-	URLs       map[string]string
-	URLsRevers map[string]string
+	conf *Config
+	URLs URLsType
 }
 
 func New(conf *Config) *Storage {
-	return &Storage{
-		conf:       conf,
-		URLs:       make(map[string]string),
-		URLsRevers: make(map[string]string),
+	s := &Storage{
+		conf: conf,
+		URLs: make(URLsType),
+	}
+	if len(conf.FilePath) > 0 {
+		ExtractJSONURLData(conf.FilePath, &s.URLs)
+		flag1 := os.O_WRONLY | os.O_CREATE | os.O_APPEND
+		jsonFile, err := os.OpenFile(conf.FilePath, flag1, 0777)
+		if err != nil {
+			return s
+		}
+		defer jsonFile.Close()
+		byteValue, _ := ioutil.ReadAll(jsonFile)
+		_ = json.Unmarshal(byteValue, &s)
+
+	}
+
+	return s
+}
+
+func ExtractJSONURLData(fileName string, s *URLsType) {
+	jsonFile, err := os.Open(fileName)
+	if err != nil {
+		return
+	}
+	defer jsonFile.Close()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	_ = json.Unmarshal(byteValue, &s)
+}
+
+func (s *Storage) SaveData() {
+
+	if len(s.conf.FilePath) > 0 {
+		jsonString, err := json.Marshal(s.URLs)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		_ = ioutil.WriteFile(s.conf.FilePath, jsonString, 0644)
+
 	}
 }
 
 //Create and return short url for given original URL. Return the same short url for the same orginal URL
 func (s *Storage) GetURLShort(originalURL string) string {
 
-	if shortURL, isExists := s.URLsRevers[originalURL]; isExists {
-		return shortURL
-	}
-
 	shortURL := s.getUnicURL()
 	s.URLs[shortURL] = originalURL
 
+	s.SaveData()
 	return shortURL
 }
 
