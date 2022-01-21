@@ -149,6 +149,7 @@ func (a *App) StartHTTPServer() {
 func (a *App) Routing() *http.Server {
 	r := chi.NewRouter()
 
+	r.Use(gzipHandle)
 	r.Post("/", a.GetShortURL)
 	r.Post("/api/shorten", a.GetShortURLJson)
 	r.Get("/{ID}", a.GetFullURLByShortURL)
