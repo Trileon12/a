@@ -2,6 +2,7 @@ package app
 
 import (
 	"compress/gzip"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -19,9 +20,11 @@ func (w gzipWriter) Write(b []byte) (int, error) {
 func gzipHandle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
+		fmt.Println("midleware")
 		//Если gzip не поддерживатеся, то ничего не делем
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			next.ServeHTTP(w, r)
+			fmt.Println("Заголовк Accept-Encoding не поддерживается")
 			return
 		}
 
