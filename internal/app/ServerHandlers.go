@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Trileon12/a/internal/Middleware"
 	"github.com/Trileon12/a/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"io"
@@ -149,11 +150,12 @@ func (a *App) StartHTTPServer() {
 func (a *App) Routing() *http.Server {
 	r := chi.NewRouter()
 
-	//r.Use(gzipHandle)
+	r.Use(Middleware.UnzipHandle)
+	r.Use(Middleware.ZipHandle)
 	r.Post("/", a.GetShortURL)
 	r.Post("/api/shorten", a.GetShortURLJson)
 	r.Get("/{ID}", a.GetFullURLByShortURL)
 
-	srv := &http.Server{Addr: a.conf.ServerAddress, Handler: gzipHandle(r)}
+	srv := &http.Server{Addr: a.conf.ServerAddress, Handler: r}
 	return srv
 }
