@@ -61,9 +61,9 @@ func (a *App) GetShortURL(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, "I made bad URL, sorry", http.StatusBadRequest)
 	}
 
-	userId := request.Header.Get("userID")
+	userID := request.Header.Get("userID")
 
-	u.Path = a.storage.GetURLShort(link, userId)
+	u.Path = a.storage.GetURLShort(link, userID)
 
 	shortLink := u.String()
 	writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -95,8 +95,8 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 	if err != nil {
 		http.Error(writer, "I made bad URL, sorry", http.StatusBadRequest)
 	}
-	userId := request.Header.Get("userID")
-	u.Path = a.storage.GetURLShort(b.URL, userId)
+	userID := request.Header.Get("userID")
+	u.Path = a.storage.GetURLShort(b.URL, userID)
 
 	resp := ShortURLResponse{}
 	resp.Result = u.String()
@@ -112,8 +112,8 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 }
 
 func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
-	userId := request.Header.Get("userID")
-	userURLS := a.storage.GetUserURLS(userId)
+	userID := request.Header.Get("userID")
+	userURLS := a.storage.GetUserURLS(userID)
 
 	if len(userURLS) == 0 {
 		writer.WriteHeader(http.StatusNoContent)
@@ -168,7 +168,7 @@ func (a *App) Routing() *http.Server {
 
 	r.Use(Middleware.UnzipHandle)
 	r.Use(Middleware.ZipHandle)
-	r.Use(Middleware.SetUserIdCookieHandle)
+	r.Use(Middleware.SetUserIDCookieHandle)
 	r.Post("/", a.GetShortURL)
 	r.Post("/api/shorten", a.GetShortURLJson)
 	r.Get("/{ID}", a.GetFullURLByShortURL)

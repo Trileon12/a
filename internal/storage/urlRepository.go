@@ -73,7 +73,7 @@ func (s *Storage) SaveData() {
 }
 
 //Create and return short url for given original URL. Return the same short url for the same orginal URL
-func (s *Storage) GetURLShort(originalURL string, userId string) string {
+func (s *Storage) GetURLShort(originalURL string, userID string) string {
 
 	shortURL := s.getUnicURL()
 	s.URLs[shortURL] = originalURL
@@ -83,13 +83,13 @@ func (s *Storage) GetURLShort(originalURL string, userId string) string {
 		OriginalURL: originalURL,
 	}
 
-	s.UserURLs[userId] = append(s.UserURLs[userId], newPair)
+	s.UserURLs[userID] = append(s.UserURLs[userID], newPair)
 	s.SaveData()
 	return shortURL
 }
 
-func (s *Storage) GetUserURLS(userId string) []URLPair {
-	return s.UserURLs[userId]
+func (s *Storage) GetUserURLS(userID string) []URLPair {
+	return s.UserURLs[userID]
 
 }
 

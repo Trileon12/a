@@ -63,20 +63,20 @@ func ZipHandle(next http.Handler) http.Handler {
 }
 
 //userCookie
-func SetUserIdCookieHandle(next http.Handler) http.Handler {
+func SetUserIDCookieHandle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 
-		userIdCookie, err := request.Cookie("token")
+		userIDCookie, err := request.Cookie("token")
 		createNewIdentity := false
 
 		if err == http.ErrNoCookie {
 			createNewIdentity = true
 		} else {
-			id, err := checkSign(userIdCookie.Value)
+			id, err := checkSign(userIDCookie.Value)
 			if err == ErrWrongSign {
 				createNewIdentity = true
 			}
-			request.Header.Set("userId", strconv.Itoa(int(id)))
+			request.Header.Set("userID", strconv.Itoa(int(id)))
 		}
 
 		if createNewIdentity {
@@ -90,12 +90,12 @@ func SetUserIdCookieHandle(next http.Handler) http.Handler {
 				http.Error(response, err.Error(), http.StatusBadRequest)
 				return
 			}
-			userIdCookie = &http.Cookie{Name: "tocken", Value: token}
-			request.AddCookie(userIdCookie)
+			userIDCookie = &http.Cookie{Name: "tocken", Value: token}
+			request.AddCookie(userIDCookie)
 		}
 
 		next.ServeHTTP(response, request)
-		http.SetCookie(response, userIdCookie)
+		http.SetCookie(response, userIDCookie)
 	})
 }
 

@@ -45,7 +45,7 @@ func TestGetOriginalURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			shortURL := s.GetURLShort(tt.args.shortURL)
+			shortURL := s.GetURLShort(tt.args.shortURL, "1")
 
 			got, err := s.GetOriginalURL(shortURL)
 
@@ -112,7 +112,7 @@ func TestGetURLShort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := s.GetURLShort(tt.args.originalURL)
+			got := s.GetURLShort(tt.args.originalURL, "1")
 			assert.Regexp(t, tt.want, got, "Random Str doesn't match the pattern")
 		})
 	}
