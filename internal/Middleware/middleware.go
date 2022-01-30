@@ -1,4 +1,4 @@
-package Middleware
+package middleware
 
 import (
 	"compress/gzip"
@@ -80,7 +80,7 @@ func SetUserIDCookieHandle(next http.Handler) http.Handler {
 		}
 
 		if createNewIdentity {
-			id, err := genId()
+			id, err := genID()
 			if err != nil {
 				http.Error(response, err.Error(), http.StatusBadRequest)
 				return
@@ -99,7 +99,7 @@ func SetUserIDCookieHandle(next http.Handler) http.Handler {
 	})
 }
 
-func genId() ([]byte, error) {
+func genID() ([]byte, error) {
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
 	if err != nil {

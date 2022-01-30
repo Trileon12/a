@@ -117,6 +117,10 @@ func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
 
 	if len(userURLS) == 0 {
 		writer.WriteHeader(http.StatusNoContent)
+	} else {
+		for _, value := range userURLS {
+			value.ShortURL = a.conf.HostShortURLs + value.ShortURL
+		}
 	}
 
 	writer.Header().Set("Content-Type", "application/json")
@@ -166,9 +170,9 @@ func (a *App) StartHTTPServer() {
 func (a *App) Routing() *http.Server {
 	r := chi.NewRouter()
 
-	r.Use(Middleware.UnzipHandle)
-	r.Use(Middleware.ZipHandle)
-	r.Use(Middleware.SetUserIDCookieHandle)
+	r.Use(middleware.UnzipHandle)
+	r.Use(middleware.ZipHandle)
+	r.Use(middleware.SetUserIDCookieHandle)
 	r.Post("/", a.GetShortURL)
 	r.Post("/api/shorten", a.GetShortURLJson)
 	r.Get("/{ID}", a.GetFullURLByShortURL)
