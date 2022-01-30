@@ -90,7 +90,8 @@ func SetUserIDCookieHandle(next http.Handler) http.Handler {
 				http.Error(response, err.Error(), http.StatusBadRequest)
 				return
 			}
-			userIDCookie = &http.Cookie{Name: "tocken", Value: token}
+			userIDCookie = &http.Cookie{Name: "token", Value: token}
+			request.Header.Set("userID", strconv.Itoa(int(binary.BigEndian.Uint32(id))))
 			request.AddCookie(userIDCookie)
 		}
 
