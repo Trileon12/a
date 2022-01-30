@@ -14,16 +14,24 @@ type Config struct {
 }
 
 type URLsType map[string]string
+type URLPair struct {
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+}
+
+type UserURLs map[string][]URLPair
 
 type Storage struct {
-	conf *Config
-	URLs URLsType
+	conf     *Config
+	URLs     URLsType
+	UserURLs UserURLs
 }
 
 func New(conf *Config) *Storage {
 	s := &Storage{
-		conf: conf,
-		URLs: make(URLsType),
+		conf:     conf,
+		URLs:     make(URLsType),
+		UserURLs: make(UserURLs),
 	}
 	if len(conf.FilePath) > 0 {
 		ExtractJSONURLData(conf.FilePath, &s.URLs)
@@ -65,13 +73,24 @@ func (s *Storage) SaveData() {
 }
 
 //Create and return short url for given original URL. Return the same short url for the same orginal URL
-func (s *Storage) GetURLShort(originalURL string) string {
+func (s *Storage) GetURLShort(originalURL string, userId string) string {
 
 	shortURL := s.getUnicURL()
 	s.URLs[shortURL] = originalURL
 
+	newPair := URLPair{
+		ShortURL:    shortURL,
+		OriginalURL: originalURL,
+	}
+
+	s.UserURLs[userId] = append(s.UserURLs[userId], newPair)
 	s.SaveData()
 	return shortURL
+}
+
+func (s *Storage) GetUserURLS(userId string) []URLPair {
+	return s.UserURLs[userId]
+
 }
 
 //Func returns original url by short url

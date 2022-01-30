@@ -60,7 +60,10 @@ func (a *App) GetShortURL(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		http.Error(writer, "I made bad URL, sorry", http.StatusBadRequest)
 	}
-	u.Path = a.storage.GetURLShort(link)
+
+	userId := request.Header.Get("userID")
+
+	u.Path = a.storage.GetURLShort(link, userId)
 
 	shortLink := u.String()
 	writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -92,7 +95,8 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 	if err != nil {
 		http.Error(writer, "I made bad URL, sorry", http.StatusBadRequest)
 	}
-	u.Path = a.storage.GetURLShort(b.URL)
+	userId := request.Header.Get("userID")
+	u.Path = a.storage.GetURLShort(b.URL, userId)
 
 	resp := ShortURLResponse{}
 	resp.Result = u.String()
@@ -105,6 +109,18 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 		http.Error(writer, "I have short URL, but not for you", http.StatusBadRequest)
 		return
 	}
+}
+
+func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
+	userId := request.Header.Get("userID")
+	userURLS := a.storage.GetUserURLS(userId)
+
+	if len(userURLS) == 0 {
+		writer.WriteHeader(http.StatusNoContent)
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(userURLS)
 }
 
 // GetFullURLByShortURL Get full URL by short URL
@@ -152,9 +168,11 @@ func (a *App) Routing() *http.Server {
 
 	r.Use(Middleware.UnzipHandle)
 	r.Use(Middleware.ZipHandle)
+	r.Use(Middleware.SetUserIdCookieHandle)
 	r.Post("/", a.GetShortURL)
 	r.Post("/api/shorten", a.GetShortURLJson)
 	r.Get("/{ID}", a.GetFullURLByShortURL)
+	r.Get("/user/urls", a.GetUserURLs)
 
 	srv := &http.Server{Addr: a.conf.ServerAddress, Handler: r}
 	return srv
