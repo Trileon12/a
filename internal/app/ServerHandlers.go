@@ -117,8 +117,9 @@ func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
 
 	if len(userURLS) == 0 {
 		writer.WriteHeader(http.StatusNoContent)
+		return
 	} else {
-		for i, _ := range userURLS {
+		for i := range userURLS {
 			userURLS[i].ShortURL = a.conf.HostShortURLs + userURLS[i].ShortURL
 		}
 	}
