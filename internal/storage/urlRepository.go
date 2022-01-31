@@ -39,21 +39,21 @@ type StoragePG struct {
 }
 
 func NewPG(conf *Config) *StoragePG {
-	fmt.Fprintf(os.Stderr, "Connect to  %v\n", conf.DBAddress)
-	db, err := pgx.Connect(context.Background(), conf.DBAddress)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
-	}
 
 	return &StoragePG{
 		Conf: conf,
-		DB:   db,
+		DB:   nil,
 	}
 }
 
 func (s *StoragePG) Ping(ctx context.Context) error {
-	return s.DB.Ping(ctx)
+	fmt.Fprintf(os.Stderr, "Connect to  %v\n", s.Conf.DBAddress)
+	db, err := pgx.Connect(context.Background(), s.Conf.DBAddress)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	return db.Ping(ctx)
 
 }
 
