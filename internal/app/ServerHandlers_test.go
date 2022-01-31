@@ -51,7 +51,8 @@ func TestMain(m *testing.M) {
 func TestGetShortURL(t *testing.T) {
 
 	s := storage.New(&conf.Storage)
-	application := app.New(&conf.App, s)
+	spg := storage.NewPG(&conf.Storage)
+	application := app.New(&conf.App, s, spg)
 
 	tests := []tstRequest{
 		{
@@ -167,7 +168,8 @@ func TestGetShortURL(t *testing.T) {
 func TestShortURL(t *testing.T) {
 
 	s := storage.New(&conf.Storage)
-	application := app.New(&conf.App, s)
+	spg := storage.NewPG(&conf.Storage)
+	application := app.New(&conf.App, s, spg)
 
 	tests := []tstRequest{
 		{

@@ -8,6 +8,7 @@ import (
 	"github.com/Trileon12/a/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -131,6 +132,7 @@ func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
 
 func (a *App) Ping(writer http.ResponseWriter, request *http.Request) {
 
+	log.Fatal(a.storagePG.Conf.DBAddress)
 	err := a.storagePG.Ping(context.Background())
 	if err != nil {
 		http.Error(writer, "I made bad URL, sorry", http.StatusInternalServerError)

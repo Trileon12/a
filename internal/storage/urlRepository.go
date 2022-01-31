@@ -33,7 +33,7 @@ type Storage struct {
 }
 
 type StoragePG struct {
-	conf *Config
+	Conf *Config
 	DB   *pgx.Conn
 }
 
@@ -45,7 +45,7 @@ func NewPG(conf *Config) *StoragePG {
 	}
 
 	return &StoragePG{
-		conf: conf,
+		Conf: conf,
 		DB:   db,
 	}
 }
