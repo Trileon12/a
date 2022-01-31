@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jackc/pgx/v4"
+
 	_ "github.com/jackc/pgx/v4"
 	"io/ioutil"
 	"log"
@@ -15,7 +16,7 @@ import (
 type Config struct {
 	MaxLength int    `env:"MaxLength" envDefault:"6"`
 	FilePath  string `env:"FILE_STORAGE_PATH"`
-	DBAddress string `env:"DATABASE_DSN" envDefault:"postgres://postgres:myPassword@localhost:5432/dbvideo"`
+	DBAddress string `env:"DATABASE_DSN"`
 }
 
 type URLsType map[string]string
@@ -38,6 +39,7 @@ type StoragePG struct {
 }
 
 func NewPG(conf *Config) *StoragePG {
+	fmt.Fprintf(os.Stderr, "Connect to  %v\n", conf.DBAddress)
 	db, err := pgx.Connect(context.Background(), conf.DBAddress)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
