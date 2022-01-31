@@ -1,8 +1,12 @@
 package storage
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/v4"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,6 +15,7 @@ import (
 type Config struct {
 	MaxLength int    `env:"MaxLength" envDefault:"6"`
 	FilePath  string `env:"FILE_STORAGE_PATH"`
+	DBAddress string `env:"DATABASE_DSN" envDefault:"postgres://postgres:myPassword@localhost:5432/dbvideo"`
 }
 
 type URLsType map[string]string
@@ -27,12 +32,41 @@ type Storage struct {
 	UserURLs UserURLs
 }
 
+type StoragePG struct {
+	conf *Config
+	DB   *pgx.Conn
+}
+
+func NewPG(conf *Config) *StoragePG {
+	db, err := pgx.Connect(context.Background(), conf.DBAddress)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+
+	return &StoragePG{
+		conf: conf,
+		DB:   db,
+	}
+}
+
+func (s *StoragePG) Ping(ctx context.Context) error {
+	return s.DB.Ping(ctx)
+
+}
+
+func (s *StoragePG) Close(ctx context.Context) {
+	s.DB.Close(ctx)
+
+}
+
 func New(conf *Config) *Storage {
 	s := &Storage{
 		conf:     conf,
 		URLs:     make(URLsType),
 		UserURLs: make(UserURLs),
 	}
+
 	if len(conf.FilePath) > 0 {
 		ExtractJSONURLData(conf.FilePath, &s.URLs)
 		flag1 := os.O_WRONLY | os.O_CREATE | os.O_APPEND

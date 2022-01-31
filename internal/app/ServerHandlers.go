@@ -24,8 +24,9 @@ type Config struct {
 }
 
 type App struct {
-	conf    *Config
-	storage *storage.Storage
+	conf      *Config
+	storage   *storage.Storage
+	storagePG *storage.StoragePG
 }
 
 type ShortURLRequest struct {
@@ -36,8 +37,8 @@ type ShortURLResponse struct {
 	Result string `json:"result"`
 }
 
-func New(conf *Config, storage *storage.Storage) *App {
-	return &App{conf, storage}
+func New(conf *Config, storage *storage.Storage, spg *storage.StoragePG) *App {
+	return &App{conf, storage, spg}
 }
 
 // GetShortURL Get short URL for full url
@@ -128,6 +129,19 @@ func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
 	json.NewEncoder(writer).Encode(userURLS)
 }
 
+func (a *App) Ping(writer http.ResponseWriter, request *http.Request) {
+
+	err := a.storagePG.Ping(context.Background())
+	if err != nil {
+		http.Error(writer, "I made bad URL, sorry", http.StatusInternalServerError)
+
+	} else {
+		writer.WriteHeader(http.StatusOK)
+
+	}
+
+}
+
 // GetFullURLByShortURL Get full URL by short URL
 func (a *App) GetFullURLByShortURL(writer http.ResponseWriter, request *http.Request) {
 
@@ -178,6 +192,7 @@ func (a *App) Routing() *http.Server {
 	r.Post("/api/shorten", a.GetShortURLJson)
 	r.Get("/{ID}", a.GetFullURLByShortURL)
 	r.Get("/user/urls", a.GetUserURLs)
+	r.Get("/ping", a.Ping)
 
 	srv := &http.Server{Addr: a.conf.ServerAddress, Handler: r}
 	return srv
