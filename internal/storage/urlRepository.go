@@ -58,7 +58,7 @@ func (s *StoragePG) Ping(ctx context.Context) error {
 }
 
 func (s *StoragePG) Close(ctx context.Context) {
-	s.DB.Close(ctx)
+	//s.DB.Close(ctx)
 
 }
 

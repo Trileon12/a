@@ -5,7 +5,6 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
-	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
@@ -77,6 +76,10 @@ func SetUserIDCookieHandle(next http.Handler) http.Handler {
 			id, err := checkSign(userIDCookie.Value)
 			if err == ErrWrongSign {
 				createNewIdentity = true
+
+			} else if err != nil {
+				http.Error(response, err.Error(), http.StatusBadRequest)
+				return
 			}
 			request.Header.Set("userID", strconv.Itoa(int(id)))
 			fmt.Fprintf(os.Stderr, "====> BAD SIGN! REGISTER NEW USER WITH ID %v\n", strconv.Itoa(int(id)))
@@ -95,12 +98,13 @@ func SetUserIDCookieHandle(next http.Handler) http.Handler {
 			}
 			userIDCookie = &http.Cookie{Name: "token", Value: token}
 			request.Header.Set("userID", strconv.Itoa(int(binary.BigEndian.Uint32(id))))
-			fmt.Fprintf(os.Stderr, "====> REGISTER NEW USER WITH ID %v\n", strconv.Itoa(int(binary.BigEndian.Uint32(id))))
+			fmt.Fprintf(os.Stderr, "====> REGISTER NEW USER WITH ID %v AND SET TOCKEN %V \n ", strconv.Itoa(int(binary.BigEndian.Uint32(id))), token)
 			request.AddCookie(userIDCookie)
 		}
 
-		next.ServeHTTP(response, request)
 		http.SetCookie(response, userIDCookie)
+		next.ServeHTTP(response, request)
+		fmt.Fprintf(os.Stderr, "====> SET COOKIE \n ")
 	})
 }
 
@@ -118,9 +122,14 @@ func checkSign(msg string) (uint32, error) {
 		data []byte
 		id   uint32
 		sign []byte
+		err  error
 	)
 
-	data, _ = hex.DecodeString(msg)
+	data, err = hex.DecodeString(msg)
+	if err != nil {
+		return 0, err
+	}
+
 	id = binary.BigEndian.Uint32(data[:4])
 	h := hmac.New(sha256.New, []byte("secret key"))
 	h.Write(data[:4])
@@ -137,5 +146,5 @@ func Sign(id []byte) (string, error) {
 	h := hmac.New(sha256.New, []byte("secret key"))
 	h.Write(id)
 	dst := h.Sum(nil)
-	return base64.StdEncoding.EncodeToString(append(id, dst...)), nil
+	return hex.EncodeToString(append(id, dst...)), nil
 }
