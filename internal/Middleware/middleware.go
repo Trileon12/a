@@ -9,8 +9,10 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -77,6 +79,7 @@ func SetUserIDCookieHandle(next http.Handler) http.Handler {
 				createNewIdentity = true
 			}
 			request.Header.Set("userID", strconv.Itoa(int(id)))
+			fmt.Fprintf(os.Stderr, "====> BAD SIGN! REGISTER NEW USER WITH ID %v\n", strconv.Itoa(int(id)))
 		}
 
 		if createNewIdentity {
@@ -92,6 +95,7 @@ func SetUserIDCookieHandle(next http.Handler) http.Handler {
 			}
 			userIDCookie = &http.Cookie{Name: "token", Value: token}
 			request.Header.Set("userID", strconv.Itoa(int(binary.BigEndian.Uint32(id))))
+			fmt.Fprintf(os.Stderr, "====> REGISTER NEW USER WITH ID %v\n", strconv.Itoa(int(binary.BigEndian.Uint32(id))))
 			request.AddCookie(userIDCookie)
 		}
 

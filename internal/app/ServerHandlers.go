@@ -71,6 +71,7 @@ func (a *App) GetShortURL(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	writer.WriteHeader(http.StatusCreated)
 
+	fmt.Fprintf(os.Stderr, "====> FOR USER %v SET SHORT URL %v \n", userID, shortLink)
 	_, err = writer.Write([]byte(shortLink))
 	if err != nil {
 		http.Error(writer, "I have short URL, but not for you", http.StatusBadRequest)
@@ -118,6 +119,7 @@ func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
 	userURLS := a.storage.GetUserURLS(userID)
 
 	if len(userURLS) == 0 {
+		fmt.Fprintf(os.Stderr, "====> FOR USER %v NO CONTENT \n", userID)
 		writer.WriteHeader(http.StatusNoContent)
 		return
 	} else {
@@ -195,7 +197,7 @@ func (a *App) Routing() *http.Server {
 	r.Get("/{ID}", a.GetFullURLByShortURL)
 	r.Get("/user/urls", a.GetUserURLs)
 	r.Get("/ping", a.Ping)
-	fmt.Fprintf(os.Stderr, "Connect to  %v\n", a.conf.ServerAddress)
+	fmt.Fprintf(os.Stderr, "Connect to  %v \n", a.conf.ServerAddress)
 	srv := &http.Server{Addr: a.conf.ServerAddress, Handler: r}
 	return srv
 }
