@@ -2,12 +2,11 @@ package storage
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/jackc/pgx/v4"
-
-	//_ "github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	"io/ioutil"
 	"log"
 	"os"
@@ -35,25 +34,31 @@ type Storage struct {
 
 type StoragePG struct {
 	Conf *Config
-	DB   *pgx.Conn
+	DB   *sql.DB
 }
 
 func NewPG(conf *Config) *StoragePG {
 
-	return &StoragePG{
+	s := &StoragePG{
 		Conf: conf,
 		DB:   nil,
 	}
+
+	var err error
+	if conf.DBAddress != "" {
+		s.DB, err = sql.Open("pgx", conf.DBAddress)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+			os.Exit(1)
+		}
+	}
+
+	return s
 }
 
 func (s *StoragePG) Ping(ctx context.Context) error {
-	fmt.Fprintf(os.Stderr, "Connect to  %v\n", s.Conf.DBAddress)
-	db, err := pgx.Connect(context.Background(), s.Conf.DBAddress)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
-	}
-	return db.Ping(ctx)
+
+	return s.DB.PingContext(ctx)
 
 }
 
