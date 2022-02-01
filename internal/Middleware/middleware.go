@@ -104,7 +104,7 @@ func SetUserIDCookieHandle(next http.Handler) http.Handler {
 
 		http.SetCookie(response, userIDCookie)
 		next.ServeHTTP(response, request)
-		fmt.Fprintf(os.Stderr, "====> SET COOKIE \n ")
+
 	})
 }
 
