@@ -98,7 +98,7 @@ func SetUserIDCookieHandle(next http.Handler) http.Handler {
 			}
 			userIDCookie = &http.Cookie{Name: "token", Value: token}
 			request.Header.Set("userID", strconv.Itoa(int(binary.BigEndian.Uint32(id))))
-			fmt.Fprintf(os.Stderr, "====> REGISTER NEW USER WITH ID %v AND SET TOCKEN %V \n ", strconv.Itoa(int(binary.BigEndian.Uint32(id))), token)
+			fmt.Fprintf(os.Stderr, "====> REGISTER NEW USER WITH ID %v AND SET TOCKEN %v \n ", strconv.Itoa(int(binary.BigEndian.Uint32(id))), token)
 			request.AddCookie(userIDCookie)
 		}
 
