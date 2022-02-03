@@ -78,12 +78,11 @@ func (s *StorageDB) GetUserURLS(userID string) []URLPair {
 	if err != nil {
 		return nil
 	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
 
-		}
-	}(rows)
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
 
 	res := make([]URLPair, 0)
 	for rows.Next() { // пробегаем по всем записям
@@ -138,5 +137,5 @@ func (s *StorageDB) Migrate() {
 }
 
 func (s *StorageDB) SaveData() {
-	return
+
 }
