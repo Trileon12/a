@@ -78,7 +78,12 @@ func (s *StorageDB) GetUserURLS(userID string) []URLPair {
 	if err != nil {
 		return nil
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
 
 	res := make([]URLPair, 0)
 	for rows.Next() { // пробегаем по всем записям
@@ -113,7 +118,7 @@ func (s *StorageDB) GetOriginalURL(shortURL string) (string, error) {
 
 func (s *StorageDB) Migrate() {
 
-	mgratescript := "create table if not exists  urls (" +
+	var mgratescript = "create table if not exists  urls (" +
 		"ID            serial" +
 		"        constraint id_pk" +
 		"            primary key," +

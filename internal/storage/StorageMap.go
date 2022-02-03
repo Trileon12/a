@@ -45,7 +45,7 @@ func (s *StorageMap) Ping(ctx context.Context) error {
 	return nil
 }
 func (s *StorageMap) Close() {
-	return
+
 }
 func (s *StorageMap) SaveData() {
 
