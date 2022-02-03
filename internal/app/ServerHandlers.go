@@ -115,7 +115,7 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
 	userID := request.Header.Get("userID")
 	userURLS := a.storage.GetUserURLS(userID)
-
+	writer.Header().Set("Content-Type", "application/json")
 	if len(userURLS) == 0 {
 		fmt.Fprintf(os.Stderr, "====> FOR USER %v NO CONTENT \n", userID)
 		writer.WriteHeader(http.StatusNoContent)
@@ -126,7 +126,7 @@ func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
 	json.NewEncoder(writer).Encode(userURLS)
 }
 
