@@ -24,7 +24,7 @@ func TestGetOriginalURL(t *testing.T) {
 		shortURL string
 	}
 
-	s := storage.New(&conf.Storage)
+	s := storage.MakeStorage(&conf.Storage)
 
 	tests := []struct {
 		name string
@@ -61,7 +61,7 @@ func TestGetOriginalURLErr(t *testing.T) {
 		shortURL string
 	}
 
-	s := storage.New(&conf.Storage)
+	s := storage.MakeStorage(&conf.Storage)
 
 	tests := []struct {
 		name string
@@ -92,7 +92,7 @@ func TestGetURLShort(t *testing.T) {
 		originalURL string
 	}
 
-	s := storage.New(&conf.Storage)
+	s := storage.MakeStorage(&conf.Storage)
 
 	tests := []struct {
 		name string

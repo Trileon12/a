@@ -24,9 +24,8 @@ type Config struct {
 }
 
 type App struct {
-	conf      *Config
-	storage   *storage.Storage
-	storagePG *storage.StoragePG
+	conf    *Config
+	storage storage.Storage
 }
 
 type ShortURLRequest struct {
@@ -37,8 +36,8 @@ type ShortURLResponse struct {
 	Result string `json:"result"`
 }
 
-func New(conf *Config, storage *storage.Storage, spg *storage.StoragePG) *App {
-	return &App{conf, storage, spg}
+func New(conf *Config, storage storage.Storage) *App {
+	return &App{conf, storage}
 }
 
 // GetShortURL Get short URL for full url
@@ -133,8 +132,7 @@ func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
 
 func (a *App) Ping(writer http.ResponseWriter, request *http.Request) {
 
-	fmt.Fprintf(os.Stderr, a.storagePG.Conf.DBAddress)
-	err := a.storagePG.Ping(context.Background())
+	err := a.storage.Ping(context.Background())
 	if err != nil {
 		http.Error(writer, "I made bad URL, sorry", http.StatusInternalServerError)
 

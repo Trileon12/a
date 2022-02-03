@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/Trileon12/a/internal/app"
 	"github.com/Trileon12/a/internal/config"
 	"github.com/Trileon12/a/internal/storage"
@@ -9,13 +8,12 @@ import (
 
 func main() {
 
-	ctx := context.Background()
 	conf := config.New()
-	s := storage.New(&conf.Storage)
-	spg := storage.NewPG(&conf.Storage)
+	s := storage.MakeStorage(&conf.Storage)
+
 	defer s.SaveData()
-	defer spg.Close(ctx)
-	application := app.New(&conf.App, s, spg)
+	defer s.Close()
+	application := app.New(&conf.App, s)
 
 	application.StartHTTPServer()
 

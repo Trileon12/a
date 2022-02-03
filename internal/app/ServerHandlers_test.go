@@ -44,15 +44,18 @@ func TestMain(m *testing.M) {
 	conf = config.New()
 	appTsts := m.Run()
 
+	//flag.StringVar(&conf.StorageDB.DBAddress, "d", conf.StorageDB.DBAddress, "Postgres address")
+	//flag.Parse()
+
 	os.Exit(appTsts)
 
 }
 
 func TestGetShortURL(t *testing.T) {
 
-	s := storage.New(&conf.Storage)
-	spg := storage.NewPG(&conf.Storage)
-	application := app.New(&conf.App, s, spg)
+	s := storage.MakeStorage(&conf.Storage)
+
+	application := app.New(&conf.App, s)
 
 	tests := []tstRequest{
 		{
@@ -167,9 +170,9 @@ func TestGetShortURL(t *testing.T) {
 
 func TestShortURL(t *testing.T) {
 
-	s := storage.New(&conf.Storage)
-	spg := storage.NewPG(&conf.Storage)
-	application := app.New(&conf.App, s, spg)
+	s := storage.MakeStorage(&conf.Storage)
+
+	application := app.New(&conf.App, s)
 
 	tests := []tstRequest{
 		{

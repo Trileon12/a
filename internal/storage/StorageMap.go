@@ -2,73 +2,24 @@ package storage
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"io/ioutil"
 	"log"
 	"os"
 )
 
-type Config struct {
-	MaxLength int    `env:"MaxLength" envDefault:"6"`
-	FilePath  string `env:"FILE_STORAGE_PATH"`
-	DBAddress string `env:"DATABASE_DSN"`
-}
-
-type URLsType map[string]string
-type URLPair struct {
-	ShortURL    string `json:"short_url"`
-	OriginalURL string `json:"original_url"`
-}
-
 type UserURLs map[string][]URLPair
 
-type Storage struct {
+type StorageMap struct {
 	conf     *Config
 	URLs     URLsType
 	UserURLs UserURLs
 }
 
-type StoragePG struct {
-	Conf *Config
-	DB   *sql.DB
-}
-
-func NewPG(conf *Config) *StoragePG {
-
-	s := &StoragePG{
-		Conf: conf,
-		DB:   nil,
-	}
-
-	var err error
-	if conf.DBAddress != "" {
-		s.DB, err = sql.Open("pgx", conf.DBAddress)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-			os.Exit(1)
-		}
-	}
-
-	return s
-}
-
-func (s *StoragePG) Ping(ctx context.Context) error {
-
-	return s.DB.PingContext(ctx)
-
-}
-
-func (s *StoragePG) Close(ctx context.Context) {
-	//s.DB.Close(ctx)
-
-}
-
-func New(conf *Config) *Storage {
-	s := &Storage{
+func NewStorageMap(conf *Config) Storage {
+	s := &StorageMap{
 		conf:     conf,
 		URLs:     make(URLsType),
 		UserURLs: make(UserURLs),
@@ -90,17 +41,13 @@ func New(conf *Config) *Storage {
 	return s
 }
 
-func ExtractJSONURLData(fileName string, s *URLsType) {
-	jsonFile, err := os.Open(fileName)
-	if err != nil {
-		return
-	}
-	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	_ = json.Unmarshal(byteValue, &s)
+func (s *StorageMap) Ping(ctx context.Context) error {
+	return nil
 }
-
-func (s *Storage) SaveData() {
+func (s *StorageMap) Close() {
+	return
+}
+func (s *StorageMap) SaveData() {
 
 	if len(s.conf.FilePath) > 0 {
 		jsonString, err := json.Marshal(s.URLs)
@@ -114,7 +61,7 @@ func (s *Storage) SaveData() {
 }
 
 //Create and return short url for given original URL. Return the same short url for the same orginal URL
-func (s *Storage) GetURLShort(originalURL string, userID string) string {
+func (s *StorageMap) GetURLShort(originalURL string, userID string) string {
 
 	shortURL := s.getUnicURL()
 	s.URLs[shortURL] = originalURL
@@ -129,13 +76,13 @@ func (s *Storage) GetURLShort(originalURL string, userID string) string {
 	return shortURL
 }
 
-func (s *Storage) GetUserURLS(userID string) []URLPair {
+func (s *StorageMap) GetUserURLS(userID string) []URLPair {
 	return s.UserURLs[userID]
 
 }
 
-//Func returns original url by short url
-func (s *Storage) GetOriginalURL(shortURL string) (string, error) {
+// GetOriginalURL Func returns original url by short url
+func (s *StorageMap) GetOriginalURL(shortURL string) (string, error) {
 
 	if originalURL, isExists := s.URLs[shortURL]; isExists {
 		return originalURL, nil
@@ -144,7 +91,7 @@ func (s *Storage) GetOriginalURL(shortURL string) (string, error) {
 	}
 }
 
-func (s *Storage) getUnicURL() string {
+func (s *StorageMap) getUnicURL() string {
 
 	found := false
 	shortURL := RandString(s.conf.MaxLength)
