@@ -63,4 +63,4 @@ func ExtractJSONURLData(fileName string, s *URLsType) {
 	_ = json.Unmarshal(byteValue, &s)
 }
 
-var DuplicateOriginalURLError = errors.New("Дублированная ссылка")
+var ErrDuplicateOriginalURL = errors.New("дублированная ссылка")

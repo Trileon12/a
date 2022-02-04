@@ -65,8 +65,8 @@ func (s *StorageDB) GetURLsShort(originalURL []ShortURLItemRequest, userID strin
 	var errd error
 	for i := range originalURL {
 		shortURL, err := s.GetURLShort(originalURL[i].OriginalURL, userID)
-		if errors.Is(err, DuplicateOriginalURLError) {
-			errd = DuplicateOriginalURLError
+		if errors.Is(err, ErrDuplicateOriginalURL) {
+			errd = ErrDuplicateOriginalURL
 		}
 		res[i] = ShortURLItemResponse{
 			ShortURL:      host + shortURL,
@@ -90,9 +90,9 @@ func (s *StorageDB) GetURLShort(originalURL string, userID string) (string, erro
 	}
 
 	if res.Valid {
-		return shortURL, nil
+		return res.String, ErrDuplicateOriginalURL
 	} else {
-		return shortURL, DuplicateOriginalURLError
+		return shortURL, nil
 	}
 
 }

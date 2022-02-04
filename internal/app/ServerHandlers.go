@@ -67,7 +67,7 @@ func (a *App) GetShortURL(writer http.ResponseWriter, request *http.Request) {
 	var httpStatus int
 	u.Path, err = a.storage.GetURLShort(link, userID)
 
-	if errors.Is(err, storage.DuplicateOriginalURLError) {
+	if errors.Is(err, storage.ErrDuplicateOriginalURL) {
 		httpStatus = http.StatusConflict
 	} else {
 		httpStatus = http.StatusCreated
@@ -107,7 +107,7 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 	var httpStatus int
 	u.Path, err = a.storage.GetURLShort(b.URL, userID)
 
-	if errors.Is(err, storage.DuplicateOriginalURLError) {
+	if errors.Is(err, storage.ErrDuplicateOriginalURL) {
 		httpStatus = http.StatusConflict
 	} else {
 		httpStatus = http.StatusCreated
@@ -138,7 +138,7 @@ func (a *App) GetShortURLsJSON(writer http.ResponseWriter, request *http.Request
 	userID := request.Header.Get("userID")
 	var httpStatus int
 	res, err := a.storage.GetURLsShort(b, userID, a.conf.HostShortURLs)
-	if errors.Is(err, storage.DuplicateOriginalURLError) {
+	if errors.Is(err, storage.ErrDuplicateOriginalURL) {
 		httpStatus = http.StatusConflict
 	} else {
 		httpStatus = http.StatusCreated
