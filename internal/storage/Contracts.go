@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 )
@@ -34,8 +35,8 @@ type ShortURLItemResponse struct {
 }
 
 type Storage interface {
-	GetURLShort(originalURL string, userID string) string
-	GetURLsShort(originalURL []ShortURLItemRequest, userID string, host string) []ShortURLItemResponse
+	GetURLShort(originalURL string, userID string) (string, error)
+	GetURLsShort(originalURL []ShortURLItemRequest, userID string, host string) ([]ShortURLItemResponse, error)
 	GetUserURLS(userID string) []URLPair
 	Ping(ctx context.Context) error
 	GetOriginalURL(shortURL string) (string, error)
@@ -58,5 +59,8 @@ func ExtractJSONURLData(fileName string, s *URLsType) {
 	}
 	defer jsonFile.Close()
 	byteValue, _ := ioutil.ReadAll(jsonFile)
+
 	_ = json.Unmarshal(byteValue, &s)
 }
+
+var DuplicateOriginalURLError = errors.New("Дублированная ссылка")

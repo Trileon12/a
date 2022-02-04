@@ -33,8 +33,8 @@ func TestGetOriginalURL(t *testing.T) {
 	}{
 		{
 			name: "DoesntURL",
-			args: args{shortURL: "www.google.com"},
-			want: "www.google.com",
+			args: args{shortURL: "www.google.com10000"},
+			want: "www.google.com10000",
 		},
 		{
 			name: "Some text ",
@@ -45,7 +45,7 @@ func TestGetOriginalURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			shortURL := s.GetURLShort(tt.args.shortURL, "1")
+			shortURL, _ := s.GetURLShort(tt.args.shortURL, "1")
 
 			got, err := s.GetOriginalURL(shortURL)
 
@@ -101,7 +101,7 @@ func TestGetURLShort(t *testing.T) {
 	}{
 		{
 			name: "std url",
-			args: args{originalURL: "www.google.com"},
+			args: args{originalURL: "www.google.com1"},
 			want: "[[:alpha:]]{6}$",
 		},
 		{
@@ -112,7 +112,7 @@ func TestGetURLShort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := s.GetURLShort(tt.args.originalURL, "1")
+			got, _ := s.GetURLShort(tt.args.originalURL, "1")
 			assert.Regexp(t, tt.want, got, "Random Str doesn't match the pattern")
 		})
 	}

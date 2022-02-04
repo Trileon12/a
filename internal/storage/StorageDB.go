@@ -59,30 +59,42 @@ func NewStorageDB(conf *Config) *StorageDB {
 	return s
 }
 
-func (s *StorageDB) GetURLsShort(originalURL []ShortURLItemRequest, userID string, host string) []ShortURLItemResponse {
+func (s *StorageDB) GetURLsShort(originalURL []ShortURLItemRequest, userID string, host string) ([]ShortURLItemResponse, error) {
 
 	res := make([]ShortURLItemResponse, len(originalURL))
+	var errd error
 	for i := range originalURL {
-		shortURL := s.GetURLShort(originalURL[i].OriginalURL, userID)
+		shortURL, err := s.GetURLShort(originalURL[i].OriginalURL, userID)
+		if errors.Is(err, DuplicateOriginalURLError) {
+			errd = DuplicateOriginalURLError
+		}
 		res[i] = ShortURLItemResponse{
 			ShortURL:      host + shortURL,
 			CorrelationID: originalURL[i].CorrelationID,
 		}
 	}
-	return res
+	return res, errd
 }
 
 // GetURLShort Create and return short url for given original URL. Return the same short url for the same orginal URL
-func (s *StorageDB) GetURLShort(originalURL string, userID string) string {
+func (s *StorageDB) GetURLShort(originalURL string, userID string) (string, error) {
 
 	shortURL := RandString(s.Conf.MaxLength)
-	_, err := s.DB.Exec("insert into urls (\"UserId\", \"OriginalURL\", \"ShortURL\")"+
-		" values ($1, $2, $3)", userID, originalURL, shortURL)
+	rows := s.DB.QueryRow("insert into urls (\"UserId\", \"OriginalURL\", \"ShortURL\")"+
+		" values ($1, $2, $3) ON CONFLICT (\"OriginalURL\")  DO UPDATE SET \"OriginalURL\"=EXCLUDED.\"OriginalURL\"  RETURNING \"ShortURL\"", userID, originalURL, shortURL)
+
+	var res sql.NullString
+	err := rows.Scan(&res)
 	if err != nil {
-		return shortURL
+		return "", err
 	}
 
-	return shortURL
+	if res.Valid {
+		return shortURL, nil
+	} else {
+		return shortURL, DuplicateOriginalURLError
+	}
+
 }
 
 func (s *StorageDB) GetUserURLS(userID string) []URLPair {
@@ -140,7 +152,7 @@ func (s *StorageDB) Migrate() {
 		");" +
 		"create unique index if not exists  id__index" +
 		"    on urls (ID);" +
-		"create index  if not exists  originalurl_index" +
+		"create unique index  if not exists  originalurl_index" +
 		"    on urls (\"OriginalURL\");" +
 		"create index if not exists  shorturl_index" +
 		"    on urls (\"ShortURL\");" +

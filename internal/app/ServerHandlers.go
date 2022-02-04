@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Trileon12/a/internal/Middleware"
 	"github.com/Trileon12/a/internal/storage"
@@ -63,11 +64,17 @@ func (a *App) GetShortURL(writer http.ResponseWriter, request *http.Request) {
 
 	userID := request.Header.Get("userID")
 
-	u.Path = a.storage.GetURLShort(link, userID)
+	var httpStatus int
+	u.Path, err = a.storage.GetURLShort(link, userID)
 
+	if errors.Is(err, storage.DuplicateOriginalURLError) {
+		httpStatus = http.StatusConflict
+	} else {
+		httpStatus = http.StatusCreated
+	}
 	shortLink := u.String()
 	writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	writer.WriteHeader(http.StatusCreated)
+	writer.WriteHeader(httpStatus)
 
 	fmt.Fprintf(os.Stderr, "====> FOR USER %v SET SHORT URL %v \n", userID, shortLink)
 	_, err = writer.Write([]byte(shortLink))
@@ -97,13 +104,19 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 		http.Error(writer, "I made bad URL, sorry", http.StatusBadRequest)
 	}
 	userID := request.Header.Get("userID")
-	u.Path = a.storage.GetURLShort(b.URL, userID)
+	var httpStatus int
+	u.Path, err = a.storage.GetURLShort(b.URL, userID)
 
+	if errors.Is(err, storage.DuplicateOriginalURLError) {
+		httpStatus = http.StatusConflict
+	} else {
+		httpStatus = http.StatusCreated
+	}
 	resp := ShortURLResponse{}
 	resp.Result = u.String()
 
 	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusCreated)
+	writer.WriteHeader(httpStatus)
 
 	err = json.NewEncoder(writer).Encode(resp)
 	if err != nil {
@@ -123,12 +136,19 @@ func (a *App) GetShortURLsJSON(writer http.ResponseWriter, request *http.Request
 	}
 
 	userID := request.Header.Get("userID")
-	res := a.storage.GetURLsShort(b, userID, a.conf.HostShortURLs)
+	var httpStatus int
+	res, err := a.storage.GetURLsShort(b, userID, a.conf.HostShortURLs)
+	if errors.Is(err, storage.DuplicateOriginalURLError) {
+		httpStatus = http.StatusConflict
+	} else {
+		httpStatus = http.StatusCreated
+	}
 
 	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusCreated)
 
-	err := json.NewEncoder(writer).Encode(res)
+	writer.WriteHeader(httpStatus)
+
+	err = json.NewEncoder(writer).Encode(res)
 	if err != nil {
 		http.Error(writer, "I have short URL, but not for you", http.StatusBadRequest)
 		return

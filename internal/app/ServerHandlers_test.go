@@ -78,7 +78,7 @@ func TestGetShortURL(t *testing.T) {
 			request: request{
 				method:      http.MethodPost,
 				url:         "/api/shorten",
-				originalURL: "www.google.com",
+				originalURL: "www.google.com2",
 				jsonFormat:  true,
 			},
 			want1: want{
@@ -181,7 +181,7 @@ func TestShortURL(t *testing.T) {
 			request: request{
 				method:      http.MethodGet,
 				url:         host + "/qGHrty",
-				originalURL: "www.google.com",
+				originalURL: "www.google.com5",
 			},
 			want1: want{
 

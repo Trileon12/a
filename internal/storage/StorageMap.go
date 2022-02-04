@@ -41,17 +41,17 @@ func NewStorageMap(conf *Config) Storage {
 	return s
 }
 
-func (s *StorageMap) GetURLsShort(originalURL []ShortURLItemRequest, userID string, host string) []ShortURLItemResponse {
+func (s *StorageMap) GetURLsShort(originalURL []ShortURLItemRequest, userID string, host string) ([]ShortURLItemResponse, error) {
 
 	res := make([]ShortURLItemResponse, len(originalURL))
 	for i := range originalURL {
-		shortURL := s.GetURLShort(originalURL[i].OriginalURL, userID)
+		shortURL, _ := s.GetURLShort(originalURL[i].OriginalURL, userID)
 		res[i] = ShortURLItemResponse{
 			ShortURL:      host + shortURL,
 			CorrelationID: originalURL[i].CorrelationID,
 		}
 	}
-	return res
+	return res, nil
 }
 
 func (s *StorageMap) Ping(ctx context.Context) error {
@@ -74,7 +74,7 @@ func (s *StorageMap) SaveData() {
 }
 
 //Create and return short url for given original URL. Return the same short url for the same orginal URL
-func (s *StorageMap) GetURLShort(originalURL string, userID string) string {
+func (s *StorageMap) GetURLShort(originalURL string, userID string) (string, error) {
 
 	shortURL := s.getUnicURL()
 	s.URLs[shortURL] = originalURL
@@ -86,7 +86,7 @@ func (s *StorageMap) GetURLShort(originalURL string, userID string) string {
 
 	s.UserURLs[userID] = append(s.UserURLs[userID], newPair)
 	s.SaveData()
-	return shortURL
+	return shortURL, nil
 }
 
 func (s *StorageMap) GetUserURLS(userID string) []URLPair {
