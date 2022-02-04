@@ -217,7 +217,7 @@ func (a *App) Routing() *http.Server {
 	r.Get("/{ID}", a.GetFullURLByShortURL)
 	r.Get("/user/urls", a.GetUserURLs)
 	r.Get("/ping", a.Ping)
-	r.Get("/api/shorten/batch", a.GetShortURLsJSON)
+	r.Post("/api/shorten/batch", a.GetShortURLsJSON)
 	fmt.Fprintf(os.Stderr, "Connect to  %v \n", a.conf.ServerAddress)
 	srv := &http.Server{Addr: a.conf.ServerAddress, Handler: r}
 	return srv
