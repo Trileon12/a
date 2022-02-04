@@ -112,6 +112,29 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 	}
 }
 
+// GetShortURLJson Get short URL for full url JSON format
+func (a *App) GetShortURLsJson(writer http.ResponseWriter, request *http.Request) {
+
+	var b []storage.ShortURLItemRequest
+
+	if err := json.NewDecoder(request.Body).Decode(&b); err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	userID := request.Header.Get("userID")
+	res := a.storage.GetURLsShort(b, userID, a.conf.HostShortURLs)
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusCreated)
+
+	err := json.NewEncoder(writer).Encode(res)
+	if err != nil {
+		http.Error(writer, "I have short URL, but not for you", http.StatusBadRequest)
+		return
+	}
+}
+
 func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
 	userID := request.Header.Get("userID")
 	userURLS := a.storage.GetUserURLS(userID)

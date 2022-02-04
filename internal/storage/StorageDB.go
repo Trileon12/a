@@ -59,6 +59,19 @@ func NewStorageDB(conf *Config) *StorageDB {
 	return s
 }
 
+func (s *StorageDB) GetURLsShort(originalURL []ShortURLItemRequest, userID string, host string) []ShortURLItemResponse {
+
+	res := make([]ShortURLItemResponse, len(originalURL))
+	for i, _ := range originalURL {
+		shortURL := s.GetURLShort(originalURL[i].OriginalURL, userID)
+		res = append(res, ShortURLItemResponse{
+			ShortUrl:      host + shortURL,
+			CorrelationId: originalURL[i].CorrelationId,
+		})
+	}
+	return res
+}
+
 // GetURLShort Create and return short url for given original URL. Return the same short url for the same orginal URL
 func (s *StorageDB) GetURLShort(originalURL string, userID string) string {
 

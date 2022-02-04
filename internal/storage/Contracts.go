@@ -23,8 +23,19 @@ type URLPair struct {
 	OriginalURL string `json:"original_url"`
 }
 
+type ShortURLItemRequest struct {
+	OriginalURL   string `json:"original_url"`
+	CorrelationId string `json:"correlation_id"`
+}
+
+type ShortURLItemResponse struct {
+	ShortUrl      string `json:"short_url"`
+	CorrelationId string `json:"correlation_id"`
+}
+
 type Storage interface {
 	GetURLShort(originalURL string, userID string) string
+	GetURLsShort(originalURL []ShortURLItemRequest, userID string, host string) []ShortURLItemResponse
 	GetUserURLS(userID string) []URLPair
 	Ping(ctx context.Context) error
 	GetOriginalURL(shortURL string) (string, error)
