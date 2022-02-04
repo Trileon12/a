@@ -62,7 +62,7 @@ func NewStorageDB(conf *Config) *StorageDB {
 func (s *StorageDB) GetURLsShort(originalURL []ShortURLItemRequest, userID string, host string) []ShortURLItemResponse {
 
 	res := make([]ShortURLItemResponse, len(originalURL))
-	for i, _ := range originalURL {
+	for i := range originalURL {
 		shortURL := s.GetURLShort(originalURL[i].OriginalURL, userID)
 		res = append(res, ShortURLItemResponse{
 			ShortURL:      host + shortURL,
