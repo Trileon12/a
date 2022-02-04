@@ -81,7 +81,7 @@ func (s *StorageDB) GetURLShort(originalURL string, userID string) (string, erro
 
 	shortURL := RandString(s.Conf.MaxLength)
 	rows := s.DB.QueryRow("insert into urls (\"UserId\", \"OriginalURL\", \"ShortURL\")"+
-		" values ($1, $2, $3) ON CONFLICT (\"OriginalURL\")  DO UPDATE SET \"OriginalURL\"=EXCLUDED.\"OriginalURL\"  RETURNING \"ShortURL\"", userID, originalURL, shortURL)
+		" values ($1, $2, $3) ON CONFLICT (\"OriginalURL\")  DO UPDATE SET \"id\"=EXCLUDED.\"id\"  RETURNING \"ShortURL\"", userID, originalURL, shortURL)
 
 	var res sql.NullString
 	err := rows.Scan(&res)
@@ -89,7 +89,7 @@ func (s *StorageDB) GetURLShort(originalURL string, userID string) (string, erro
 		return "", err
 	}
 
-	if res.Valid {
+	if res.String != shortURL {
 		return res.String, ErrDuplicateOriginalURL
 	} else {
 		return shortURL, nil
