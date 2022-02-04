@@ -64,10 +64,10 @@ func (s *StorageDB) GetURLsShort(originalURL []ShortURLItemRequest, userID strin
 	res := make([]ShortURLItemResponse, len(originalURL))
 	for i := range originalURL {
 		shortURL := s.GetURLShort(originalURL[i].OriginalURL, userID)
-		res = append(res, ShortURLItemResponse{
+		res[i] = ShortURLItemResponse{
 			ShortURL:      host + shortURL,
 			CorrelationID: originalURL[i].CorrelationID,
-		})
+		}
 	}
 	return res
 }
