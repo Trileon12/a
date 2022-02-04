@@ -113,7 +113,7 @@ func (a *App) GetShortURLJson(writer http.ResponseWriter, request *http.Request)
 }
 
 // GetShortURLJson Get short URL for full url JSON format
-func (a *App) GetShortURLsJson(writer http.ResponseWriter, request *http.Request) {
+func (a *App) GetShortURLsJSON(writer http.ResponseWriter, request *http.Request) {
 
 	var b []storage.ShortURLItemRequest
 
@@ -217,6 +217,7 @@ func (a *App) Routing() *http.Server {
 	r.Get("/{ID}", a.GetFullURLByShortURL)
 	r.Get("/user/urls", a.GetUserURLs)
 	r.Get("/ping", a.Ping)
+	r.Get("/api/shorten/batch", a.GetShortURLsJSON)
 	fmt.Fprintf(os.Stderr, "Connect to  %v \n", a.conf.ServerAddress)
 	srv := &http.Server{Addr: a.conf.ServerAddress, Handler: r}
 	return srv

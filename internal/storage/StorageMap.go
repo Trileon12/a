@@ -47,8 +47,8 @@ func (s *StorageMap) GetURLsShort(originalURL []ShortURLItemRequest, userID stri
 	for i, _ := range originalURL {
 		shortURL := s.GetURLShort(originalURL[i].OriginalURL, userID)
 		res = append(res, ShortURLItemResponse{
-			ShortUrl:      host + shortURL,
-			CorrelationId: originalURL[i].CorrelationId,
+			ShortURL:      host + shortURL,
+			CorrelationID: originalURL[i].CorrelationID,
 		})
 	}
 	return res
