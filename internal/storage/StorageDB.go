@@ -99,7 +99,7 @@ func (s *StorageDB) GetURLShort(originalURL string, userID string) (string, erro
 
 func (s *StorageDB) GetUserURLS(userID string) []URLPair {
 
-	rows, err := s.DB.Query("Select \"OriginalURL\",\"ShortURL\" from urls where \"UserId\"='$1'", userID)
+	rows, err := s.DB.Query("Select \"OriginalURL\",\"ShortURL\" from urls where \"UserId\"=$1", userID)
 	if err != nil {
 		return nil
 	}

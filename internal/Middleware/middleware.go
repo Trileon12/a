@@ -76,13 +76,12 @@ func SetUserIDCookieHandle(next http.Handler) http.Handler {
 			id, err := checkSign(userIDCookie.Value)
 			if err == ErrWrongSign {
 				createNewIdentity = true
-
+				fmt.Fprintf(os.Stderr, "====> BAD SIGN! REGISTER NEW USER WITH ID %v\n", strconv.Itoa(int(id)))
 			} else if err != nil {
 				http.Error(response, err.Error(), http.StatusBadRequest)
 				return
 			}
 			request.Header.Set("userID", strconv.Itoa(int(id)))
-			fmt.Fprintf(os.Stderr, "====> BAD SIGN! REGISTER NEW USER WITH ID %v\n", strconv.Itoa(int(id)))
 		}
 
 		if createNewIdentity {
@@ -117,6 +116,8 @@ func genID() ([]byte, error) {
 	return b, nil
 }
 
+var secret = []byte("secret key")
+
 func checkSign(msg string) (uint32, error) {
 	var (
 		data []byte
@@ -131,10 +132,9 @@ func checkSign(msg string) (uint32, error) {
 	}
 
 	id = binary.BigEndian.Uint32(data[:4])
-	h := hmac.New(sha256.New, []byte("secret key"))
+	h := hmac.New(sha256.New, secret)
 	h.Write(data[:4])
 	sign = h.Sum(nil)
-
 	if hmac.Equal(sign, data[4:]) {
 		return id, nil
 	} else {
@@ -143,7 +143,7 @@ func checkSign(msg string) (uint32, error) {
 }
 
 func Sign(id []byte) (string, error) {
-	h := hmac.New(sha256.New, []byte("secret key"))
+	h := hmac.New(sha256.New, secret)
 	h.Write(id)
 	dst := h.Sum(nil)
 	return hex.EncodeToString(append(id, dst...)), nil
