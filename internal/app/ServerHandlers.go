@@ -173,7 +173,7 @@ func (a *App) GetUserURLs(writer http.ResponseWriter, request *http.Request) {
 	json.NewEncoder(writer).Encode(userURLS)
 }
 
-func (a *App) Ping(writer http.ResponseWriter, request *http.Request) {
+func (a *App) Ping(writer http.ResponseWriter, _ *http.Request) {
 
 	err := a.storage.Ping(context.Background())
 	if err != nil {
@@ -186,12 +186,31 @@ func (a *App) Ping(writer http.ResponseWriter, request *http.Request) {
 
 }
 
+func (a *App) DeleteURLs(writer http.ResponseWriter, request *http.Request) {
+	var URLs []string
+
+	if err := json.NewDecoder(request.Body).Decode(&URLs); err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+	userID := request.Header.Get("userID")
+
+	a.storage.DeleteURLS(userID, URLs)
+
+	writer.WriteHeader(http.StatusAccepted)
+
+}
+
 // GetFullURLByShortURL Get full URL by short URL
 func (a *App) GetFullURLByShortURL(writer http.ResponseWriter, request *http.Request) {
 
 	id := path.Base(request.URL.Path)
 
-	URL, err := a.storage.GetOriginalURL(id)
+	URL, err := a.storage.GetOriginalURL(id, "")
+	if err == storage.ErrURLDeleted {
+		http.Error(writer, err.Error(), http.StatusGone)
+		return
+	}
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusNotFound)
 		return
@@ -238,6 +257,7 @@ func (a *App) Routing() *http.Server {
 	r.Get("/user/urls", a.GetUserURLs)
 	r.Get("/ping", a.Ping)
 	r.Post("/api/shorten/batch", a.GetShortURLsJSON)
+	r.Delete("/api/user/urls", a.DeleteURLs)
 	fmt.Fprintf(os.Stderr, "Connect to  %v \n", a.conf.ServerAddress)
 	srv := &http.Server{Addr: a.conf.ServerAddress, Handler: r}
 	return srv

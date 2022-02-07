@@ -12,9 +12,30 @@ import (
 )
 
 type StorageDB struct {
-	Conf *Config
-	URLs URLsType
-	DB   *sql.DB
+	Conf       *Config
+	URLs       URLsType
+	DB         *sql.DB
+	DeleteChan chan UserURLList
+}
+
+func (s *StorageDB) DeleteURLS(userID string, URLs []string) {
+	s.DeleteChan <- UserURLList{
+		UserID: userID,
+		URLs:   URLs,
+	}
+}
+
+func (s *StorageDB) ProcessDeleteURLS() {
+
+	delItem, ok := <-s.DeleteChan
+	if !ok {
+		return
+	}
+
+	var updateScript = `update urls set "isDeleted" = true where"UserId" = $1 and "OriginalURL" = any ($2) `
+
+	s.DB.Exec(updateScript, delItem.UserID, delItem.URLs)
+
 }
 
 func (s *StorageDB) Ping(ctx context.Context) error {
@@ -25,12 +46,16 @@ func (s *StorageDB) Close() {
 	if s.DB != nil {
 		s.DB.Close()
 	}
+
+	close(s.DeleteChan)
 }
 
 func NewStorageDB(conf *Config) *StorageDB {
+
 	s := &StorageDB{
-		Conf: conf,
-		DB:   nil,
+		Conf:       conf,
+		DB:         nil,
+		DeleteChan: make(chan UserURLList),
 	}
 
 	var err error
@@ -55,6 +80,8 @@ func NewStorageDB(conf *Config) *StorageDB {
 		_ = json.Unmarshal(byteValue, &s)
 
 	}
+
+	go s.ProcessDeleteURLS()
 
 	return s
 }
@@ -99,7 +126,7 @@ func (s *StorageDB) GetURLShort(originalURL string, userID string) (string, erro
 
 func (s *StorageDB) GetUserURLS(userID string) []URLPair {
 
-	rows, err := s.DB.Query("Select \"OriginalURL\",\"ShortURL\" from urls where \"UserId\"=$1", userID)
+	rows, err := s.DB.Query("Select \"OriginalURL\",\"ShortURL\" from urls where \"UserId\"=$1  and not ", userID)
 	if err != nil {
 		return nil
 	}
@@ -124,20 +151,27 @@ func (s *StorageDB) GetUserURLS(userID string) []URLPair {
 }
 
 // GetOriginalURL Func returns original url by short url
-func (s *StorageDB) GetOriginalURL(shortURL string) (string, error) {
+func (s *StorageDB) GetOriginalURL(shortURL string, userID string) (string, error) {
 
-	rows := s.DB.QueryRow("Select \"OriginalURL\" from urls where \"ShortURL\"=$1", shortURL)
+	rows := s.DB.QueryRow("Select \"OriginalURL\", \"isDeleted\"  from urls where \"ShortURL\"=$1", shortURL)
 
-	var res sql.NullString
-	err := rows.Scan(&res)
+	var originalURL sql.NullString
+	var isDelited sql.NullBool
+
+	err := rows.Scan(&originalURL, &isDelited)
 	if err != nil {
 		return "", err
 	}
-	if res.Valid {
-		return res.String, nil
-	} else {
+	if !originalURL.Valid {
 		return "", errors.New("URL не найден")
 	}
+
+	if isDelited.Bool {
+		return "", ErrURLDeleted
+	}
+
+	return originalURL.String, nil
+
 }
 
 func (s *StorageDB) Migrate() {
@@ -148,7 +182,8 @@ func (s *StorageDB) Migrate() {
 		"            primary key," +
 		"    \"UserId\"      text," +
 		"    \"OriginalURL\" text," +
-		"    \"ShortURL\"    text" +
+		"    \"ShortURL\"    text," +
+		"    \"isDeleted\"    bool default false" +
 		");" +
 		"create unique index if not exists  id__index" +
 		"    on urls (ID);" +
