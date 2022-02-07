@@ -30,6 +30,7 @@ func New() *Config {
 	flag.StringVar(&cfgApp.ServerAddress, "a", cfgApp.ServerAddress, "port to run server")
 	flag.StringVar(&cfgApp.HostShortURLs, "b", cfgApp.HostShortURLs, "base URL for shorten URL response")
 	flag.StringVar(&cfgStorage.FilePath, "f", cfgStorage.FilePath, "file to store shorten URLs")
+	flag.StringVar(&cfgStorage.DBAddress, "d", cfgStorage.DBAddress, "Postgres address")
 	flag.Parse()
 
 	return &Config{

@@ -9,9 +9,12 @@ import (
 func main() {
 
 	conf := config.New()
-	s := storage.New(&conf.Storage)
+	s := storage.MakeStorage(&conf.Storage)
+
 	defer s.SaveData()
+	defer s.Close()
 	application := app.New(&conf.App, s)
+
 	application.StartHTTPServer()
 
 }

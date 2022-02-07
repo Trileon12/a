@@ -44,13 +44,17 @@ func TestMain(m *testing.M) {
 	conf = config.New()
 	appTsts := m.Run()
 
+	//flag.StringVar(&conf.StorageDB.DBAddress, "d", conf.StorageDB.DBAddress, "Postgres address")
+	//flag.Parse()
+
 	os.Exit(appTsts)
 
 }
 
 func TestGetShortURL(t *testing.T) {
 
-	s := storage.New(&conf.Storage)
+	s := storage.MakeStorage(&conf.Storage)
+
 	application := app.New(&conf.App, s)
 
 	tests := []tstRequest{
@@ -74,7 +78,7 @@ func TestGetShortURL(t *testing.T) {
 			request: request{
 				method:      http.MethodPost,
 				url:         "/api/shorten",
-				originalURL: "www.google.com",
+				originalURL: "www.google.com2",
 				jsonFormat:  true,
 			},
 			want1: want{
@@ -166,7 +170,8 @@ func TestGetShortURL(t *testing.T) {
 
 func TestShortURL(t *testing.T) {
 
-	s := storage.New(&conf.Storage)
+	s := storage.MakeStorage(&conf.Storage)
+
 	application := app.New(&conf.App, s)
 
 	tests := []tstRequest{
@@ -176,7 +181,7 @@ func TestShortURL(t *testing.T) {
 			request: request{
 				method:      http.MethodGet,
 				url:         host + "/qGHrty",
-				originalURL: "www.google.com",
+				originalURL: "www.google.com5",
 			},
 			want1: want{
 
