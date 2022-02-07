@@ -47,7 +47,7 @@ func TestGetOriginalURL(t *testing.T) {
 
 			shortURL, _ := s.GetURLShort(tt.args.shortURL, "1")
 
-			got, err := s.GetOriginalURL(shortURL)
+			got, err := s.GetOriginalURL(shortURL, "1")
 
 			require.NoError(t, err)
 			require.Equal(t, tt.args.shortURL, got)
@@ -79,7 +79,7 @@ func TestGetOriginalURLErr(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			_, err := s.GetOriginalURL(tt.args.shortURL)
+			_, err := s.GetOriginalURL(tt.args.shortURL, "1")
 
 			require.Error(t, err)
 

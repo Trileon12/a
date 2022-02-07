@@ -18,6 +18,11 @@ type StorageMap struct {
 	UserURLs UserURLs
 }
 
+func (s *StorageMap) DeleteURLS(userID string, URLs []string) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewStorageMap(conf *Config) Storage {
 	s := &StorageMap{
 		conf:     conf,
@@ -95,7 +100,7 @@ func (s *StorageMap) GetUserURLS(userID string) []URLPair {
 }
 
 // GetOriginalURL Func returns original url by short url
-func (s *StorageMap) GetOriginalURL(shortURL string) (string, error) {
+func (s *StorageMap) GetOriginalURL(shortURL string, userID string) (string, error) {
 
 	if originalURL, isExists := s.URLs[shortURL]; isExists {
 		return originalURL, nil

@@ -24,6 +24,11 @@ type URLPair struct {
 	OriginalURL string `json:"original_url"`
 }
 
+type UserURLList struct {
+	UserID string
+	URLs   []string
+}
+
 type ShortURLItemRequest struct {
 	OriginalURL   string `json:"original_url"`
 	CorrelationID string `json:"correlation_id"`
@@ -38,8 +43,9 @@ type Storage interface {
 	GetURLShort(originalURL string, userID string) (string, error)
 	GetURLsShort(originalURL []ShortURLItemRequest, userID string, host string) ([]ShortURLItemResponse, error)
 	GetUserURLS(userID string) []URLPair
+	DeleteURLS(userID string, URLs []string)
 	Ping(ctx context.Context) error
-	GetOriginalURL(shortURL string) (string, error)
+	GetOriginalURL(shortURL string, userID string) (string, error)
 	Close()
 	SaveData()
 }
@@ -64,3 +70,4 @@ func ExtractJSONURLData(fileName string, s *URLsType) {
 }
 
 var ErrDuplicateOriginalURL = errors.New("дублированная ссылка")
+var ErrURLDeleted = errors.New("URL был удален")
